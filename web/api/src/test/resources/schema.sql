@@ -1,3 +1,11 @@
+DROP TABLE IF EXISTS step;
+DROP TABLE IF EXISTS daily_point;
+DROP TABLE IF EXISTS monthly_point;
+DROP TABLE IF EXISTS change_point_history;
+DROP TABLE IF EXISTS transaction_point;
+DROP TABLE IF EXISTS transaction_point_history;
+DROP TABLE IF EXISTS user;
+
 CREATE TABLE step (
     step_id BIGINT NOT NULL AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
