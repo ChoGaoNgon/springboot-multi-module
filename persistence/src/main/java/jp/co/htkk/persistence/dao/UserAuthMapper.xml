@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.htkk.persistence.dao.UserAuthMapper">
+
+    <resultMap id="userAuthRow" type="jp.co.htkk.persistence.dao.UserAuthMapper$UserAuthRow">
+        <id column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="del_flag" jdbcType="SMALLINT" property="delFlag"/>
+    </resultMap>
+
+    <select id="findByUsername" resultMap="userAuthRow" parameterType="java.lang.String">
+        SELECT user_id, username, password, del_flag
+        FROM users
+        WHERE username = #{username} AND del_flag = 0
+    </select>
+
+    <select id="findRoleCodes" resultType="java.lang.String" parameterType="java.lang.Long">
+        SELECT r.role_code
+        FROM user_roles ur
+        JOIN roles r ON r.role_id = ur.role_id AND r.del_flag = 0
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <select id="findPermissionCodes" resultType="java.lang.String" parameterType="java.lang.Long">
+        SELECT DISTINCT p.permission_code
+        FROM user_roles ur
+        JOIN role_permissions rp ON rp.role_id = ur.role_id
+        JOIN permissions p ON p.permission_id = rp.permission_id AND p.del_flag = 0
+        WHERE ur.user_id = #{userId}
+    </select>
+</mapper>
