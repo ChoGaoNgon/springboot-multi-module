@@ -33,7 +33,7 @@ Kết quả mong muốn: module Maven `security` độc lập; bất kỳ web ap
   - `jwt.secret` (bắt buộc khi enabled; HS256, ≥ 32 bytes)
   - `jwt.expiration` (Duration, default `30m`)
   - `jwt.renew-window` (Duration, default `3m`)
-  - `public-paths` (list, cộng thêm vào whitelist mặc định: `/auth/login`, `/swagger-ui/**`, `/api-docs/**`, `/v3/api-docs/**`, `/actuator/health`)
+  - `public-paths` (list, cộng thêm vào whitelgit stist mặc định: `/auth/login`, `/swagger-ui/**`, `/api-docs/**`, `/v3/api-docs/**`, `/actuator/health`)
 - **`JwtTokenService`** — issue / validate / renew. Claims: `sub` = username, `uid`, `roles` (codes), `perms` (codes) — tái dùng tên claim sẵn có trong `CommonConstant` khi trùng khớp.
 - **`JwtAuthenticationFilter`** — đọc `Authorization: Bearer <token>`:
   1. Hợp lệ → dựng `Authentication` (authorities = `ROLE_<role>` + permission codes) vào `SecurityContextHolder` **và** set `LoginInfo` ThreadLocal (uid, username); clear cả hai sau request (`finally`).

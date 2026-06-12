@@ -62,6 +62,13 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- Security -->
+            <dependency>
+                <groupId>jp.co.htkk</groupId>
+                <artifactId>security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- Data transfer object dependencies-->
             <dependency>
                 <groupId>jp.co.htkk</groupId>
@@ -122,6 +129,7 @@
 
     <modules>
         <module>framework</module>
+        <module>security</module>
         <module>dto</module>
         <module>entity</module>
         <module>persistence</module>
