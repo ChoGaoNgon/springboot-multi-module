@@ -8,7 +8,7 @@
 |Build tool      |`apache-maven`                         |apache-maven-3.9             |
 |Framework       |`Spring boot`                          |3.3.5                        |
 |                |`mybatis-spring-boot`                  |3.0.3                        |
-|Database        |`MySql`.                               |8.0                          |
+|Database        |`PostgreSQL`                           |16                           |
 |Web server      |`Apache Tomcat Embedded`               |10.1                         |
 |Other plugin    |`springdoc-openapi-starter-webmvc-ui`  |2.6.0                        |
 |                |`Logback`                              |                             |

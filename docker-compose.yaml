@@ -1,15 +1,21 @@
 version: "3.9"
 services:
-  mysqlDb:
-    image: mysql
+  postgresDb:
+    image: postgres:16
     volumes:
-      - data:/var/lib/mysql
+      - data:/var/lib/postgresql/data
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: helpo_step
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: helpo_step
     ports:
-      - 3306:3306
-    container_name: mysqlDb
+      - 5432:5432
+    container_name: postgresDb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d helpo_step"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   api:
     image: api:1.0.0
     build:
@@ -17,8 +23,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - 9000:9000
+    environment:
+      POSTGRES_HOST: postgresDb
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: helpo_step
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
     depends_on:
-      - mysqlDb
+      postgresDb:
+        condition: service_healthy
     container_name: api
 
 volumes:
