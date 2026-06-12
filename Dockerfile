@@ -4,6 +4,7 @@ WORKDIR /app
 # Copy the dependency specifications
 COPY pom.xml pom.xml
 COPY framework/pom.xml framework/pom.xml
+COPY security/pom.xml security/pom.xml
 COPY entity/pom.xml entity/pom.xml
 COPY dto/pom.xml dto/pom.xml
 COPY persistence/pom.xml persistence/pom.xml
@@ -20,6 +21,7 @@ RUN mvn -am -pl framework,entity dependency:resolve
 
 # Copy full sources for `api` module
 COPY framework framework
+COPY security security
 COPY entity entity
 COPY dto dto
 COPY persistence persistence
