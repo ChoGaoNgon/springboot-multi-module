@@ -104,8 +104,8 @@ public class AuditInterceptor implements Interceptor {
     }
 
     private Long getUid(LoginInfo loginInfo) {
-        // Audit uid fields (createdBy/updatedBy) are Long; returning a Long avoids a
-        // reflective Long-field = Integer-value type mismatch that silently left them null.
-        return 0L;
+        // Audit uid fields (createdBy/updatedBy) are Long; fall back to 0L for unauthenticated
+        // writes (e.g. SQL-init seed) so a reflective Long-field assignment never sees an int.
+        return loginInfo != null && loginInfo.getUid() != null ? loginInfo.getUid() : 0L;
     }
 }

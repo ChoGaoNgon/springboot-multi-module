@@ -12,6 +12,7 @@ import jp.co.htkk.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,7 @@ public class UserController extends AbstractBaseController {
     private final UserService userService;
 
     @Operation(summary = "Create a user")
+    @PreAuthorize("hasAuthority('USER_WRITE')")
     @PostMapping(value = "${endpoint.admin.user.create}")
     public ResponseEntity<UserResponse> create(@Valid @RequestBody UserCreateRequest request, BindingResult bindingResult)
             throws BindException, InvocationTargetException, IllegalAccessException, InstantiationException {
@@ -38,12 +40,14 @@ public class UserController extends AbstractBaseController {
     }
 
     @Operation(summary = "Get a user by id")
+    @PreAuthorize("hasAuthority('USER_READ')")
     @GetMapping(value = "${endpoint.admin.user.getById}")
     public ResponseEntity<UserResponse> getById(@PathVariable("userId") Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(UserResponse.of(userService.getUser(userId)));
     }
 
     @Operation(summary = "List users")
+    @PreAuthorize("hasAuthority('USER_READ')")
     @GetMapping(value = "${endpoint.admin.user.list}")
     public ResponseEntity<UserListResponse> list() {
         return ResponseEntity.status(HttpStatus.OK).body(UserListResponse.of(userService.listUsers()));

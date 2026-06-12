@@ -66,7 +66,7 @@ springdoc:
 management:
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
   health:
     mail:
       enabled: false
@@ -78,6 +78,14 @@ management:
     export:
       atlas:
         enabled: false
+
+# Security module config
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration: 30m
+      renew-window: 3m
 
 ---
 spring:

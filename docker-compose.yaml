@@ -32,6 +32,7 @@ services:
       POSTGRES_DB: helpo_step
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-please-change-0123456789-abcdefghij}
     depends_on:
       postgresDb:
         condition: service_healthy

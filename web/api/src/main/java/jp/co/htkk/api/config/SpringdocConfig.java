@@ -41,6 +41,7 @@ public class SpringdocConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        final String scheme = "bearerAuth";
         return new OpenAPI()
                 .info(new Info()
                         .title("歩数計ポイント 管理API")
@@ -49,6 +50,11 @@ public class SpringdocConfig {
                 .externalDocs(new ExternalDocumentation()
                         .description("歩数計ポイント 管理API説明")
                         .url("#todo"))
+                .components(new io.swagger.v3.oas.models.Components().addSecuritySchemes(scheme,
+                        new io.swagger.v3.oas.models.security.SecurityScheme()
+                                .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                                .scheme("bearer").bearerFormat("JWT")))
+                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList(scheme))
                 ;
     }
 }
