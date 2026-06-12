@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.4</version>
+        <version>3.3.5</version>
     </parent>
 
     <properties>
@@ -21,7 +21,7 @@
         <project.version>0.0.1-SNAPSHOT</project.version>
 
         <!-- Java -->
-        <java.version>11</java.version>
+        <java.version>21</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -29,30 +29,30 @@
 
         <!-- spring -->
         <reactor.spring.version>1.0.1.RELEASE</reactor.spring.version>
-        <springdoc.openapi-ui.version>1.6.11</springdoc.openapi-ui.version>
+        <springdoc.openapi-ui.version>2.6.0</springdoc.openapi-ui.version>
 
-        <!-- MySQL -->
+        <!-- MySQL (driver now managed by the Boot BOM; property kept only for reference) -->
         <mysql.connector.java.version>8.0.20</mysql.connector.java.version>
 
         <!--Mybatis-->
-        <mybatis.spring.boot.version>2.2.2</mybatis.spring.boot.version>
-        <pagehelper.version>5.3.2</pagehelper.version>
-        <pagehelper.spring.boot.starter.version>1.4.5</pagehelper.spring.boot.starter.version>
-        <mybatis.generator.core.version>1.4.1</mybatis.generator.core.version>
+        <mybatis.spring.boot.version>3.0.3</mybatis.spring.boot.version>
+        <pagehelper.version>6.1.0</pagehelper.version>
+        <pagehelper.spring.boot.starter.version>2.1.0</pagehelper.spring.boot.starter.version>
+        <mybatis.generator.core.version>1.4.2</mybatis.generator.core.version>
         <mybatis.generator.maven.plugin.version>1.3.7</mybatis.generator.maven.plugin.version>
         <mybatis.generator.lombok.version>1.0</mybatis.generator.lombok.version>
 
         <!-- Other libs -->
-        <lombok.version>1.18.24</lombok.version>
+        <lombok.version>1.18.34</lombok.version>
         <commons.beanutils.version>1.9.4</commons.beanutils.version>
         <commons.collections.version>4.4</commons.collections.version>
-        <commons.lang3.version>3.9</commons.lang3.version>
+        <commons.lang3.version>3.14.0</commons.lang3.version>
         <mail.version>1.4.7</mail.version>
-        <guava.version>30.0-jre</guava.version>
-        <opencsv.version>5.5.1</opencsv.version>
-        <gson.version>2.8.6</gson.version>
-        <commons.io.version>2.6</commons.io.version>
-        <commons.text.version>1.9</commons.text.version>
+        <guava.version>33.3.1-jre</guava.version>
+        <opencsv.version>5.9</opencsv.version>
+        <gson.version>2.11.0</gson.version>
+        <commons.io.version>2.16.1</commons.io.version>
+        <commons.text.version>1.12.0</commons.text.version>
     </properties>
 
     <dependencyManagement>
