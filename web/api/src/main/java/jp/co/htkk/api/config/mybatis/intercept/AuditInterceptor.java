@@ -103,7 +103,9 @@ public class AuditInterceptor implements Interceptor {
         return fields;
     }
 
-    private int getUid(LoginInfo loginInfo) {
-        return 0;
+    private Long getUid(LoginInfo loginInfo) {
+        // Audit uid fields (createdBy/updatedBy) are Long; returning a Long avoids a
+        // reflective Long-field = Integer-value type mismatch that silently left them null.
+        return 0L;
     }
 }
