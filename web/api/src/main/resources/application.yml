@@ -55,6 +55,7 @@ pagehelper:
 springdoc:
   cache:
     disabled: true
+  show-actuator: true
   swagger-ui:
     enabled: ${SWAGGER-UI-ENABLED:true}
   api-docs:
@@ -63,6 +64,9 @@ springdoc:
 
 # Actuator config
 management:
+  endpoint:
+    health:
+      show-details: always
   health:
     mail:
       enabled: false
