@@ -11,14 +11,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-// NOT @RestController (a @Component stereotype): the app component-scans jp.co.htkk, and this
-// controller is registered as a @Bean by the auto-config. @RequestMapping makes it a handler
-// without making it a @Component, so it is not registered twice.
-@RequestMapping
-@ResponseBody
+// A @RestController so it is reliably picked up as a request handler by the app's component scan
+// (scanBasePackages = "jp.co.htkk", which covers this module once the dependency is on the
+// classpath). It is intentionally NOT also registered as a @Bean by the auto-config, so there is
+// no double registration. A plain @Bean with only a type-level @RequestMapping was NOT detected as
+// a handler in this Spring MVC setup, leaving /auth/login unmapped.
+@RestController
 public class AuthController {
 
     private final SecurityUserService userService;

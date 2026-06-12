@@ -2,13 +2,10 @@ package jp.co.htkk.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.co.htkk.security.jwt.JwtTokenService;
-import jp.co.htkk.security.port.SecurityUserService;
-import jp.co.htkk.security.web.AuthController;
 import jp.co.htkk.security.web.JwtAuthenticationFilter;
 import jp.co.htkk.security.web.RestAccessDeniedHandler;
 import jp.co.htkk.security.web.RestAuthenticationEntryPoint;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -70,12 +67,9 @@ public class SecurityModuleAutoConfiguration {
         return new JwtAuthenticationFilter(tokenService);
     }
 
-    @Bean
-    @ConditionalOnBean(SecurityUserService.class)
-    public AuthController authController(SecurityUserService userService, PasswordEncoder passwordEncoder,
-                                        JwtTokenService tokenService, SecurityModuleProperties props) {
-        return new AuthController(userService, passwordEncoder, tokenService, props);
-    }
+    // AuthController is a @RestController picked up by the app's component scan, not registered here,
+    // so it is not double-registered. The consuming app must provide a SecurityUserService bean (the
+    // module's contract) for AuthController to wire.
 
     @Bean
     @ConditionalOnMissingBean(SecurityFilterChain.class)
