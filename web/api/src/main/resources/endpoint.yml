@@ -1,7 +1,6 @@
 endpoint:
   admin:
-    dashboard:
-      monthly: /admin/dashboard/monthly
-      daily: /admin/dashboard/daily
     user:
-      userSearch: /admin/user/userSearch
+      create: /admin/users
+      getById: /admin/users/{userId}
+      list: /admin/users
