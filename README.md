@@ -1,273 +1,178 @@
-# TECHNICAL
+# point-management-sys — Spring Boot 3 multi-module base
 
-##### Technology stack in project:
+Base template (groupId `jp.co.htkk`) để khởi tạo dự án Java mới: **Spring Boot 3.3.5 / Java 21**, kiến trúc **multi-module** giao tiếp qua interface, **MyBatis + PostgreSQL**, **module security tái sử dụng** (JWT + RBAC), test tích hợp trên H2, và đóng gói **Docker multi-stage** cho dev/staging/production.
 
-|Category        |Detail                                 |Version                      |
-|----------------|---------------------------------------|-----------------------------|
-|Java            |`JDK`                                  |21 (LTS)                     |
-|Build tool      |`apache-maven`                         |apache-maven-3.9             |
-|Framework       |`Spring boot`                          |3.3.5                        |
-|                |`mybatis-spring-boot`                  |3.0.3                        |
-|Database        |`PostgreSQL`                           |16                           |
-|Web server      |`Apache Tomcat Embedded`               |10.1                         |
-|Other plugin    |`springdoc-openapi-starter-webmvc-ui`  |2.6.0                        |
-|                |`Logback`                              |                             |
-|                |`Lombok`                               |1.18.34                      |
-|                |`Mybatis generate maven plugin`        |1.4.2                        |
-|                |`Mybatis schema migration maven plugin`|1.1.3                        |
+## Technology stack
 
-##### Maven project structure (Spring boot multi-module architecture):
-###### The significant advantage of using this approach is that we may reduce duplication. Splitting your application makes sense for the following:
-> - When a certain part of the project needs to have new functionality or bug fixes, you can simply focus on that module and run just the tests for it. Compiling a fraction of all the code and running just the related tests speeds up your work.
+| Category | Detail | Version |
+|---|---|---|
+| Language | `JDK` | **21 (LTS)** |
+| Build tool | `apache-maven` | 3.9 |
+| Framework | `Spring Boot` | 3.3.5 |
+| Security | `Spring Security 6` + `jjwt` (JWT HS256) | jjwt 0.12.6 |
+| Persistence | `mybatis-spring-boot-starter` | 3.0.3 |
+| Paging | `pagehelper-spring-boot-starter` (`postgresql` dialect) | 2.1.0 |
+| Database (prod) | `PostgreSQL` | 16 |
+| Database (test) | `H2` in-memory, `MODE=PostgreSQL` | — |
+| Web server | `Apache Tomcat` (embedded) | 10.1 |
+| API docs | `springdoc-openapi-starter-webmvc-ui` | 2.6.0 |
+| Logging | `Logback` | — |
+| Utilities | `Lombok` | 1.18.34 |
+| Code gen | `mybatis-generator-maven-plugin` | 1.4.2 |
+| Schema migration | `mybatis-migrations-maven-plugin` | 1.1.3 |
+| Packaging | `Docker` multi-stage (`eclipse-temurin:21-jre`, non-root) | — |
 
-> - You can re-use the code from the modules across different projects. Let's assume your project contains some well-written generic-enough code for mail sending. If you later have another project that need mail sending functionality, you can simply re-use your existing module or build upon it (in another module by adding it as a dependency).
+## Architecture — multi-module
 
-> - Easier maintainability on the long run. Maybe now it seems like a small project. In a few months things might look different and then you'll need to do more refactoring to split things into logical units (modules). <br/>
+Tách module giúp giảm trùng lặp, tái sử dụng (vd `security`, `framework`), build/test từng phần và dễ bảo trì. Thứ tự build và chiều phụ thuộc:
 
-> [Maven Multi Module benefits over simple dependency](https://stackoverflow.com/questions/15559041/maven-multi-module-benefits-over-simple-dependency)
+```
+framework → security → dto → entity → persistence → business → web/api → batch
+                                          (+ mybatis-generator, mybatis-schema-migration: tooling)
+```
 
 ```
 .
-├── pom.xml
-├── framework
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           ├── java
-│           │   └── xx.xx.xx
-│           │       └── framework
-│           │           └── constant
-│           │           └── converter
-│           │           └── util
-│           │           └── validation
-│           └── resources
-│               ├── application.properties
-│               ├── validationMessages_xx.properties
-│               ├── messages.properties
-│               └── xx/xx/xx/core
-│                   └── config.xml
-├── entity
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           ├── java
-│           │   └── xx.xx.xx
-│           │       └── entity
-│           │           ├── generator
-├── dto
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           ├── java
-│           │   └── xx.xx.xx
-│           │       └── dto
-│           │           ├── function
-│           │                   ├── request
-│           │                   ├── dxo
-│           │                   ├── prm
-│           │                   ├── rst
-│           │                   ├── response
-├── persistence
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           ├── java
-│           │   └── xx.xx.xx
-│           │       └── persistence.dao
-│           │           ├── generator
-│           │                   ├── MonthlyPointMapper.xml
-│           │                   ├── MonthlyPointMapper.java
-│           │           ├── custom
-│           │                   ├── CustomMonthlyPointMapper.xml
-│           │                   ├── CustomMonthlyPointMapper.java
-├── business
-│   ├── pom.xml
-│   ├── business-interface
-│            ├── pom.xml
-│            └── src
-│                └── main
-│                    ├── java
-│                    │   └── xx.xx.xx
-│                    │       └── business
-│                    │           ├── service
-│                    │                     ├── MonthlyPointService.java
-│   ├── business-implementation
-│            ├── pom.xml
-│            └── src
-│                └── main
-│                    ├── java
-│                    │   └── xx.xx.xx
-│                    │       └── business
-│                    │           ├── service
-│                    │                     ├── impl
-│                    │                          ├── MonthlyPointService.java
-│                └── test
-│                    ├── java
-│                    │   └── xx.xx.xx
-│                    │       └── business
-│                    │           ├── service
-│                    │                     ├── impl
-│                    │                          ├── MonthlyPointServiceTest.java
-├── web
-│ ├── pom.xml
-     ├── api
-│        ├── pom.xml
-│        └── src
-│            └── main
-│                ├── java
-│                │   └── xx.xx.xx
-│                │       └── api
-│                │           ├── aspect
-│                │           └── config
-│                │           └── exception
-│                │           └── interceptor
-│                │           └── controller
-│                │              └── DashBoardController.java
-│                │           └── ApiApplication.java
-│                └── resources
-│                    ├── application.yml
-│                    ├── api-messages_[xx].properties
-│                    ├── endpoint.yml
-│                    └── logback-spring.xml
-│                    └── xx/xx/xx/logging/env
-│                        └── logback-[env].xml
-│            └── test
-│                ├── java
-│                │   └── xx.xx.xx
-│                │       └── api
-│                │           └── controller
-│                │              └── DashBoardControllerTest.java
-│                │           └── ApiApplicationTest.java
-├── batch
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           ├── java
-│           │   └── xx.xx.xx
-│           │       └── batch
-│           │           ├── event
-│           │           └── job
-│           │           └── util
-│           │           └── BatchApplication.java
-│           └── resources
-│               ├── application.yml
-│               ├── logback-spring.xml
-│               └── jxx/xx/xx/logging/env
-│                   └── logback-[env].xml
-├── mybatis-generator
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           └── resources
-│               ├── generatorConfig.xml
-├── mybatis-schema-migration
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           └── resources
-│               ├── xx/xx/xx/migration
-│                   ├── environments
-│                       ├── [env].properties
-│                   ├── scripts
-│                       ├── [timestamp][ddl_description].properties
+├── pom.xml                         # aggregator + dependencyManagement (version tập trung)
+├── framework/                      # core dùng chung, không phụ thuộc module nào
+│   └── jp/co/htkk/framework/{component,constant,converter,csv,enums,exception,
+│                              httpclient,mail,security/model(LoginInfo),util,validation}
+├── security/                       # MODULE SECURITY tái sử dụng (auto-config)
+│   └── jp/co/htkk/security/
+│       ├── config/                 # SecurityModuleAutoConfiguration, SecurityModuleProperties
+│       ├── jwt/                     # JwtTokenService, JwtPrincipal
+│       ├── port/                    # SecurityUser, SecurityUserService (app tự cài đặt)
+│       └── web/                     # AuthController, JwtAuthenticationFilter, Rest{Auth,AccessDenied}Handler, dto
+├── entity/                         # Entity MyBatis (User)
+├── dto/                            # common: REQUEST/DXO/PRM/RST/RESPONSE + Envelope/Meta; admin/user/*
+├── persistence/                    # DAO MyBatis: UserMapper(.java/.xml), UserAuthMapper(.java/.xml)
+├── business/
+│   ├── business-interface/         # service interface (admin/UserService, AbstractBaseService)
+│   └── business-implementation/    # impl (admin/UserServiceImpl) + unit/integration tests
+├── web/                            # ── module chính ──
+│   └── api/                        # PointManagementSysApplication, controller/admin/UserController,
+│                                   #   config(MyBatisConfig, WebMvcConfiguration, SpringdocConfig),
+│                                   #   exception/ExceptionControllerAdvice, security/SecurityUserServiceImpl
+├── batch/                          # batch job độc lập (không dùng security)
+├── mybatis-generator/              # tooling: generate entity/dao
+├── mybatis-schema-migration/       # tooling: DDL migration + migrate.sh
+├── docker-compose.yaml             # DEV: postgres:16 + api + seed RBAC
+├── docker-compose.staging.yaml     # STAGING: chỉ api, DB ngoài
+├── docker-compose.production.yaml  # PRODUCTION: chỉ api, DB ngoài
+├── Dockerfile                      # multi-stage (build maven → runtime jre slim, non-root)
+└── .env.example                    # mẫu biến môi trường (không chứa giá trị thật)
 ```
 
-#### Parent - Pom Aggregator
-> This module is a maven aggregator that contains all application modules. Also, include all
-common dependencies needed by more than one module. Dependencies are defined without version because
-this project has defined Spring IO Platform as parent.
-#### Project Module - framework
-> Offers core functionality that is needed. It doesn't have any dependencies.
-#### Project Module - entity
-> Module that contains all Entities which are generated from mybatis-generator module. It doesn't have any dependencies.
-#### Project Module - dto
-> Objects that carries data between layers (controller - service - persistence). Depends of Entity, Framework modules.
-#### Project Module - persistence
-> This is Persistence layer which is also known as the repository layer. This module is responsible for data persistence and is used by the business layer to access the cache and database. Depends of Framework, Entity, Dto Modules.
-#### Project Module - business
-> This is The business layer. This module that contains contains all the business logic. It consists of services classes. Depends of Framework, Entity, Dto, Persistence Modules.
-#### Project Module - web
-> This is the main module of the project. It contains Application.java class, that contains main method, necessary to run Spring Boot applications. It contains all necessary application configuration properties. It contains all rest controllers, api resources. It include Framework, Entity, DTO, Business-Implementation, Persistence modules
-#### Project Module - batch
-> Module that contains scheduled batch job. It contains Application.java class, that contains main method, necessary to run Spring Boot applications. Depends of Framework, Entity, Dto, Persistence, Business Modules.
-#### Project Module - mybatis-generator
-> Help Tool for generating Entity and persistence code. It doesn't have any dependencies.
-#### Project Module - mybatis-schema-migration
-> Module that DDL management. It doesn't have any dependencies.
+| Module | Mô tả |
+|---|---|
+| **framework** | Core: error envelope (`ErrorResponse`/`ErrorCode`), `@ControllerAdvice` mặc định, custom validators (`jakarta.*`), i18n (`MessageService`), `LoginInfo` (ThreadLocal principal), util. |
+| **security** | JWT HS256 + RBAC tự-cấu-hình. Deny-all-except-whitelist, login `/auth/login`, 401/403 theo error envelope, tự gia hạn token. App khác chỉ **khai dependency + set secret + cung cấp 1 bean `SecurityUserService`**. |
+| **entity** | Entity MyBatis. |
+| **dto** | DTO + luồng dữ liệu giữa các tầng. |
+| **persistence** | Repository layer (MyBatis mapper). |
+| **business** | Business logic (interface + implementation tách riêng). |
+| **web/api** | App chính: REST controller, config, exception advice, adapter security. |
+| **batch** | Scheduled batch job. |
+| **mybatis-generator / mybatis-schema-migration** | Công cụ generate code / quản lý DDL. |
 
-## DTO Flow
-![DTO](assets/images/DTO.png?raw=true)
+## DTO flow
 
-## How to create schema
-[Help article](mybatis-schema-migration/README.md) for you
+`REQUEST.toDxo()` → `DXO.toPrm()` → service xử lý → `RST` → `RESPONSE` (bọc trong `Envelope`/`Meta`). Validate qua `AbstractBaseController.bindingResultWithValidate(...)`.
 
 ## How to build
-Step 1: cd to root folder <br/>
-Step 2: run script
-```shell script
-$ mvn -pl -mybatis-generator,-mybatis-schema-migration,-batch clean package -DskipTests
-``` 
 
-## How to deploy Batch module
-[Help article](batch/README.md) for you
-
-## How to deploy API module
-- Using embedded container. Running with java tool <br />
-Step 1: cd to web/api/target folder <br />
-Step 2: Run this command
-```sh
-    java -jar {APP_FILE}.jar --spring.profiles.active={ENVINROMENT} --PORT={PORT} --LOG_PATH={PATH} 
-```
-
-example: 
-* Run on develop environment
-    ```shell script
-    sudo java -jar api-0.0.1-SNAPSHOT.jar --spring.profiles.active=development  --LOG_PATH=/opt/logs/point-management-sys/api
-    ``
-
-## Api's description document
-```sh
-http://localhost:9000/api/v1/swagger-ui/index.html
-```
-
-## NOTE
-Accept-Language: en, ja or null 
-
-
-
-
-## How to run on Staging / Production (Docker Compose)
-
-Staging and production use an **external** PostgreSQL (no DB container) and **no init script** — schema is applied by `mybatis-schema-migration`. Images are built in place from the multi-stage `Dockerfile` (slim JRE runtime, non-root). All secrets are injected at run time.
-
-### 1. Apply the database schema (prerequisite)
-
-The `migrate.sh` wrapper injects the connection from environment variables (the plugin does not resolve `${...}` placeholders). It generates the env file, runs the migration, then deletes it.
+Cần **JDK 21**. Loại 2 module tooling (cần DB sống để build):
 
 ```bash
-export POSTGRES_HOST=db.internal POSTGRES_PORT=5432 POSTGRES_DB=app \
-       POSTGRES_USER=app_user POSTGRES_PASSWORD='********'
-
-./mybatis-schema-migration/migrate.sh production status                      # show status
-./mybatis-schema-migration/migrate.sh production up                          # apply pending migrations
-./mybatis-schema-migration/migrate.sh production down -Dmigration.down.steps=1   # rollback one step
+mvn clean install -pl -mybatis-generator,-mybatis-schema-migration
 ```
-(Requires JDK 21 on `PATH`/`JAVA_HOME`. Use `staging` for the staging DB. `development`/`local` still run directly, e.g. `mvn -pl mybatis-schema-migration migration:up -Dmigration.env=local`.)
 
-### 2. Run the API
+Chỉ test web/api (integration test trên H2 PostgreSQL-mode):
+```bash
+mvn test -pl web/api
+```
 
-Required env vars: `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET` (>= 32 bytes). See `.env.example`. Missing any required var makes compose fail immediately.
+## How to run — local (Docker Compose)
+
+Dev compose chạy `postgres:16` + `api`, tự tạo bảng RBAC + seed user qua `docker/postgres-init/`:
 
 ```bash
-# Copy the template and fill in real values (file is gitignored)
+JWT_SECRET=dev-secret-please-change-0123456789-abcdefghij docker compose up --build -d
+# health (whitelist, không cần token):
+curl http://localhost:9000/api/v1/actuator/health
+# tear down:
+docker compose down -v
+```
+
+Seed mặc định: `admin` / `admin123` (role ADMIN: `USER_READ`+`USER_WRITE`), `normal` / `user123` (role USER: `USER_READ`).
+
+## Authentication & RBAC
+
+- **Login** lấy access token (JWT HS256, TTL 30m):
+  ```bash
+  curl -X POST http://localhost:9000/api/v1/auth/login \
+    -H 'Content-Type: application/json' -d '{"username":"admin","password":"admin123"}'
+  # → {"accessToken":"...","tokenType":"Bearer","expiresIn":1800}
+  ```
+- Gọi API bảo vệ: thêm header `Authorization: Bearer <token>`. Không có token → 401; thiếu quyền → 403 (theo error envelope).
+- Phân quyền method-level: `@PreAuthorize("hasAuthority('USER_WRITE')")` trên controller.
+- **Tự gia hạn**: khi token còn ≤ 3 phút, response trả token mới qua header `X-New-Access-Token` — client thay token đang lưu, phiên "trượt" liên tục mà không cần refresh-token riêng.
+- Dùng cho app khác: khai dependency `jp.co.htkk:security`, set `app.security.jwt.secret`, cung cấp 1 bean `SecurityUserService`.
+
+## Database schema & migration
+
+- **Dev**: schema + seed tạo tự động bởi `docker/postgres-init/01-create-users.sql` (chỉ chạy **lần đầu** khi volume rỗng — không phải công cụ migration).
+- **Staging / Production**: dùng `mybatis-schema-migration` qua wrapper `migrate.sh` (inject connection từ biến môi trường):
+  ```bash
+  export POSTGRES_HOST=db.internal POSTGRES_PORT=5432 POSTGRES_DB=app \
+         POSTGRES_USER=app_user POSTGRES_PASSWORD='********'
+  ./mybatis-schema-migration/migrate.sh production status      # xem trạng thái
+  ./mybatis-schema-migration/migrate.sh production up          # áp dụng
+  ./mybatis-schema-migration/migrate.sh production down -Dmigration.down.steps=1   # rollback 1 bước
+  ```
+  (Cần JDK 21. Dev/local có thể chạy trực tiếp: `mvn -pl mybatis-schema-migration migration:up -Dmigration.env=local`.)
+
+## How to run — Staging / Production
+
+Staging/production dùng **PostgreSQL bên ngoài** (không có DB container, không init script — schema do migration lo). Image build tại chỗ từ `Dockerfile` multi-stage (non-root). Secret inject lúc run.
+
+```bash
+# 1) Áp schema trước (xem mục migration phía trên)
+# 2) Sao chép mẫu env, điền giá trị thật (file bị gitignore)
 cp .env.example .env.production
 
+# 3) Chạy API
 docker compose --env-file .env.production -f docker-compose.production.yaml up -d --build
 # staging:
 docker compose --env-file .env.staging -f docker-compose.staging.yaml up -d --build
 ```
 
-Health check (whitelisted, no token): `curl http://<host>:9000/api/v1/actuator/health` → `{"status":"UP"}`.
+Biến **bắt buộc**: `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET` (≥ 32 bytes). Thiếu bất kỳ biến nào → compose dừng ngay. Xem `.env.example` cho danh sách đầy đủ.
 
+## Configuration (env vars)
 
+| Biến | Bắt buộc | Mô tả |
+|---|---|---|
+| `SPRING_PROFILES_ACTIVE` | — | `development` / `staging` / `production` |
+| `POSTGRES_HOST/PORT/DB/USER/PASSWORD` | ✅ (staging/prod) | Kết nối PostgreSQL |
+| `JWT_SECRET` | ✅ | Khóa HS256, ≥ 32 bytes |
+| `APP_PORT` | — | Port publish (mặc định 9000) |
+| `LOG_PATH` | — | Thư mục log (mặc định `/var/log/app`) |
+| `JAVA_TOOL_OPTIONS` | — | Mặc định `-XX:MaxRAMPercentage=75` |
+| `CPU_LIMIT` / `MEM_LIMIT` | — | Giới hạn tài nguyên container |
 
+## API documentation (Swagger UI)
+
+```
+http://localhost:9000/api/v1/swagger-ui/index.html
+```
+Có nút **Authorize** (bearer JWT) để gọi thử endpoint đã bảo vệ.
+
+## Deploy Batch module
+
+Xem [batch/README.md](batch/README.md).
+
+## Notes
+
+- Header `Accept-Language`: `en`, `ja` (hoặc bỏ trống) cho i18n thông báo lỗi/validate.
+- Actuator: `GET /api/v1/actuator/health` (whitelist). Chi tiết health chỉ hiện khi đã xác thực (`show-details: when-authorized`).
