@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:helpo_step}?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&zeroDateTimeBehavior=convertToNull
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:123456}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
     hikari:
       # Optimize max connection pool: amount = ((core_count * 2) + effective_spindle_count)
       maximum-pool-size: 10

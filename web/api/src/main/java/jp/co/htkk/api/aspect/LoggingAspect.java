@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LoggingAspect {
 
-    @Around("execution(* ko.alliex.energy.api.controller.*.*(..))")
+    @Around("execution(* jp.co.htkk.api.controller..*.*(..))")
     public Object profileAllMethods(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
 
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
