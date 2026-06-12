@@ -122,12 +122,12 @@ public class CommonConstant {
 
     public interface MESSAGE {
         interface VALIDATION {
-            String NOT_VALID_KEY = "javax.validation.constraints.Master.message";
+            String NOT_VALID_KEY = "jakarta.validation.constraints.Master.message";
             String NOT_FOUND_KEY = "error.message.common.service.NotFound.message";
             String ERR_HAS_BEEN_DELETE_MSG = "error.message.common.delete.hasBeenDeleted";
             String DUPLICATED_KEY = "error.message.common.duplicated";
             String ERR_POW_PLANT_FILE_HAS_BEEN_DELETE = "error.message.powPlantFile.cud.notAllowDelete";
-            String NOT_BLANK_KEY = "javax.validation.constraints.NotBlank.message";
+            String NOT_BLANK_KEY = "jakarta.validation.constraints.NotBlank.message";
         }
     }
 }

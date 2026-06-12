@@ -36,7 +36,12 @@ pagehelper:
 
 ---
 spring:
-  profiles: development, staging, production
+  config:
+    activate:
+      on-profile:
+        - development
+        - staging
+        - production
 ### File Logging settings
 logging:
   file:
