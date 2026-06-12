@@ -4,16 +4,16 @@
 
 |Category        |Detail                                 |Version                      |
 |----------------|---------------------------------------|-----------------------------|
-|Java            |`JDK`                                  |11                           |
-|Build tool      |`apache-maven`                         |apache-maven-3.8.6           |
-|Framework       |`Spring boot`                          |2.7.4                        |
-|                |`mybatis-spring-boot`                  |2.3.3                        |
+|Java            |`JDK`                                  |21 (LTS)                     |
+|Build tool      |`apache-maven`                         |apache-maven-3.9             |
+|Framework       |`Spring boot`                          |3.3.5                        |
+|                |`mybatis-spring-boot`                  |3.0.3                        |
 |Database        |`MySql`.                               |8.0                          |
-|Web server      |`Apache Tomcat Embedded`               |9.0.30                       |
-|Other plugin    |`springdoc-openapi-ui`                 |1.6.11                       |
+|Web server      |`Apache Tomcat Embedded`               |10.1                         |
+|Other plugin    |`springdoc-openapi-starter-webmvc-ui`  |2.6.0                        |
 |                |`Logback`                              |                             |
-|                |`Lombok`                               |1.18.24                      |
-|                |`Mybatis generate maven plugin`        |1.4.1                        |
+|                |`Lombok`                               |1.18.34                      |
+|                |`Mybatis generate maven plugin`        |1.4.2                        |
 |                |`Mybatis schema migration maven plugin`|1.1.3                        |
 
 ##### Maven project structure (Spring boot multi-module architecture):
