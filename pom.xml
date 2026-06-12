@@ -31,9 +31,6 @@
         <reactor.spring.version>1.0.1.RELEASE</reactor.spring.version>
         <springdoc.openapi-ui.version>2.6.0</springdoc.openapi-ui.version>
 
-        <!-- MySQL (driver now managed by the Boot BOM; property kept only for reference) -->
-        <mysql.connector.java.version>8.0.20</mysql.connector.java.version>
-
         <!--Mybatis-->
         <mybatis.spring.boot.version>3.0.3</mybatis.spring.boot.version>
         <pagehelper.version>6.1.0</pagehelper.version>
