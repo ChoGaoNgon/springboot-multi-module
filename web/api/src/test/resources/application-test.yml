@@ -9,3 +9,10 @@ spring:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
+
+app:
+  security:
+    jwt:
+      secret: test-secret-0123456789-0123456789-0123456789
+      expiration: 30m
+      renew-window: 3m

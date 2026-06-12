@@ -27,11 +27,24 @@ class UserCrudIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    /** Admin (seed uid 1) holds USER_READ + USER_WRITE — required now that the app is secured. */
+    private String adminToken() throws Exception {
+        MvcResult r = mockMvc.perform(post("/auth/login").servletPath("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
+                .andExpect(status().isOk())
+                .andReturn();
+        return objectMapper.readTree(r.getResponse().getContentAsString()).path("accessToken").asText();
+    }
+
     @Test
     void createThenGetThenList() throws Exception {
+        String token = adminToken();
+
         // create
         MvcResult created = mockMvc.perform(post("/admin/users")
                         .servletPath("/admin/users")
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"alice\",\"email\":\"alice@example.com\"}"))
                 .andExpect(status().isOk())
@@ -44,13 +57,15 @@ class UserCrudIntegrationTest {
                 .path("data").path("userId").asLong();
 
         // get by id
-        mockMvc.perform(get("/admin/users/" + userId).servletPath("/admin/users/" + userId))
+        mockMvc.perform(get("/admin/users/" + userId).servletPath("/admin/users/" + userId)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.userId").value((int) userId))
                 .andExpect(jsonPath("$.data.username").value("alice"));
 
-        // list (seed-taro + alice => at least 2)
-        mockMvc.perform(get("/admin/users").servletPath("/admin/users"))
+        // list (admin + normal seed + alice => at least 3)
+        mockMvc.perform(get("/admin/users").servletPath("/admin/users")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data.length()").value(Matchers.greaterThanOrEqualTo(2)));
