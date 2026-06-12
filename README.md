@@ -236,6 +236,38 @@ Accept-Language: en, ja or null
 
 
 
+## How to run on Staging / Production (Docker Compose)
+
+Staging and production use an **external** PostgreSQL (no DB container) and **no init script** — schema is applied by `mybatis-schema-migration`. Images are built in place from the multi-stage `Dockerfile` (slim JRE runtime, non-root). All secrets are injected at run time.
+
+### 1. Apply the database schema (prerequisite)
+
+The `migrate.sh` wrapper injects the connection from environment variables (the plugin does not resolve `${...}` placeholders). It generates the env file, runs the migration, then deletes it.
+
+```bash
+export POSTGRES_HOST=db.internal POSTGRES_PORT=5432 POSTGRES_DB=app \
+       POSTGRES_USER=app_user POSTGRES_PASSWORD='********'
+
+./mybatis-schema-migration/migrate.sh production status                      # show status
+./mybatis-schema-migration/migrate.sh production up                          # apply pending migrations
+./mybatis-schema-migration/migrate.sh production down -Dmigration.down.steps=1   # rollback one step
+```
+(Requires JDK 21 on `PATH`/`JAVA_HOME`. Use `staging` for the staging DB. `development`/`local` still run directly, e.g. `mvn -pl mybatis-schema-migration migration:up -Dmigration.env=local`.)
+
+### 2. Run the API
+
+Required env vars: `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET` (>= 32 bytes). See `.env.example`. Missing any required var makes compose fail immediately.
+
+```bash
+# Copy the template and fill in real values (file is gitignored)
+cp .env.example .env.production
+
+docker compose --env-file .env.production -f docker-compose.production.yaml up -d --build
+# staging:
+docker compose --env-file .env.staging -f docker-compose.staging.yaml up -d --build
+```
+
+Health check (whitelisted, no token): `curl http://<host>:9000/api/v1/actuator/health` → `{"status":"UP"}`.
 
 
 

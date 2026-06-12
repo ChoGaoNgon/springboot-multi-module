@@ -148,3 +148,12 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/linux,java,maven,gradle,windows,macos
 
 .idea
+
+# --- Secret env files (real values, never commit) ---
+.env
+.env.*
+!.env.example
+
+# Migration env files generated at run time by migrate.sh (contain secrets)
+mybatis-schema-migration/src/main/resources/co/jp/htkk/migration/environments/staging.properties
+mybatis-schema-migration/src/main/resources/co/jp/htkk/migration/environments/production.properties
