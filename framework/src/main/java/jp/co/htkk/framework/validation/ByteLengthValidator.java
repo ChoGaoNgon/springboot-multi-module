@@ -2,8 +2,8 @@ package jp.co.htkk.framework.validation;
 
 import java.io.UnsupportedEncodingException;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import jp.co.htkk.framework.validation.annotation.ByteLength;
 import org.apache.commons.lang3.StringUtils;

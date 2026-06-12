@@ -3,8 +3,8 @@ package jp.co.htkk.framework.validation;
 import jp.co.htkk.framework.validation.annotation.LengthMinWithOutSpace;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class LengthMinWithOutSpaceValidator implements ConstraintValidator<LengthMinWithOutSpace, String> {
     private int min;

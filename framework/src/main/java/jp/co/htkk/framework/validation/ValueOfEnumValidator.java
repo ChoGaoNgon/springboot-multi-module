@@ -2,8 +2,8 @@ package jp.co.htkk.framework.validation;
 
 import jp.co.htkk.framework.validation.annotation.ValueOfEnum;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

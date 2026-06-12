@@ -3,8 +3,8 @@ package jp.co.htkk.framework.validation;
 import jp.co.htkk.framework.validation.annotation.AllowValues;
 import org.springframework.util.StringUtils;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.List;
 

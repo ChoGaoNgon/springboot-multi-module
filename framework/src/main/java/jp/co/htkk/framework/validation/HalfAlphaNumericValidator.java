@@ -3,8 +3,8 @@ package jp.co.htkk.framework.validation;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import jp.co.htkk.framework.validation.annotation.HalfAlphaNumeric;
 import org.apache.commons.lang3.StringUtils;

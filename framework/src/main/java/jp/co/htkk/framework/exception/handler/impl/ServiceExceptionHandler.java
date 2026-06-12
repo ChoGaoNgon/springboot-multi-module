@@ -5,7 +5,7 @@ import jp.co.htkk.framework.exception.model.ErrorResponse;
 import jp.co.htkk.framework.exception.type.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
