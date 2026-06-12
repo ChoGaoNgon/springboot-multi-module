@@ -5,7 +5,7 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.springdoc.core.customizers.OpenApiCustomiser;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +22,7 @@ import io.swagger.v3.oas.models.info.Info;
 public class SpringdocConfig {
 
     @Bean
-    public OpenApiCustomiser customerGlobalOpenAPICustomiser() {
+    public OpenApiCustomizer customerGlobalOpenAPICustomiser() {
         return openApi ->
             openApi.getPaths().values().forEach(pathItem -> pathItem.readOperations().forEach(operation -> {
                 ApiResponse badRequestResponse = new ApiResponse().description("Bad request");
