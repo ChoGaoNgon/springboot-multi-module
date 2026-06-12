@@ -1,7 +1,8 @@
-FROM maven:3.9-eclipse-temurin-21
+# ---------- build ----------
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy the dependency specifications
+# Copy all module poms first so dependency resolution is a cacheable layer
 COPY pom.xml pom.xml
 COPY framework/pom.xml framework/pom.xml
 COPY security/pom.xml security/pom.xml
@@ -16,10 +17,9 @@ COPY web/api/pom.xml web/api/pom.xml
 COPY mybatis-generator/pom.xml mybatis-generator/pom.xml
 COPY mybatis-schema-migration/pom.xml mybatis-schema-migration/pom.xml
 COPY batch/pom.xml batch/pom.xml
+RUN mvn -am -pl web/api -DskipTests dependency:go-offline
 
-RUN mvn -am -pl framework,entity dependency:resolve
-
-# Copy full sources for `api` module
+# Copy sources and build the api jar
 COPY framework framework
 COPY security security
 COPY entity entity
@@ -27,8 +27,18 @@ COPY dto dto
 COPY persistence persistence
 COPY business business
 COPY web web
-
 RUN mvn -am -pl web/api clean package -DskipTests
 
+# ---------- runtime ----------
+FROM eclipse-temurin:21-jre AS runtime
+WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system app && useradd --system --gid app --no-create-home app \
+    && mkdir -p /var/log/app/archived && chown -R app:app /var/log/app
+COPY --from=build /app/web/api/target/api-0.0.1-SNAPSHOT.jar app.jar
+RUN chown app:app app.jar
+USER app
 EXPOSE 9000
-CMD ["java", "-jar", "./web/api/target/api-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "app.jar"]
