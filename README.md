@@ -27,7 +27,7 @@ Base template (groupId `jp.co.htkk`) để khởi tạo dự án Java mới: **S
 Tách module giúp giảm trùng lặp, tái sử dụng (vd `security`, `framework`), build/test từng phần và dễ bảo trì. Thứ tự build và chiều phụ thuộc:
 
 ```
-framework → security → dto → entity → persistence → business → web/api → batch
+framework → security → dto → entity → persistence → business → application/{api,batch}
                                           (+ mybatis-generator, mybatis-schema-migration: tooling)
 ```
 
@@ -49,11 +49,11 @@ framework → security → dto → entity → persistence → business → web/a
 ├── business/
 │   ├── business-interface/         # service interface (admin/UserService, AbstractBaseService)
 │   └── business-implementation/    # impl (admin/UserServiceImpl) + unit/integration tests
-├── web/                            # ── module chính ──
-│   └── api/                        # PointManagementSysApplication, controller/admin/UserController,
-│                                   #   config(MyBatisConfig, WebMvcConfiguration, SpringdocConfig),
-│                                   #   exception/ExceptionControllerAdvice, security/SecurityUserServiceImpl
-├── batch/                          # batch job độc lập (không dùng security)
+├── application/                    # ── tầng application: aggregator POM ──
+│   ├── api/                        # PointManagementSysApplication, controller/admin/UserController,
+│   │                               #   config(MyBatisConfig, WebMvcConfiguration, SpringdocConfig),
+│   │                               #   exception/ExceptionControllerAdvice, security/SecurityUserServiceImpl
+│   └── batch/                      # batch job độc lập (không dùng security)
 ├── mybatis-generator/              # tooling: generate entity/dao
 ├── mybatis-schema-migration/       # tooling: DDL migration + migrate.sh
 ├── docker-compose.yaml             # DEV: postgres:16 + api + seed RBAC
@@ -71,8 +71,9 @@ framework → security → dto → entity → persistence → business → web/a
 | **dto** | DTO + luồng dữ liệu giữa các tầng. |
 | **persistence** | Repository layer (MyBatis mapper). |
 | **business** | Business logic (interface + implementation tách riêng). |
-| **web/api** | App chính: REST controller, config, exception advice, adapter security. |
-| **batch** | Scheduled batch job. |
+| **application** | Aggregator (packaging=pom) gom các app deployable; shared deps khai 1 chỗ. |
+| **application/api** | App chính: REST controller, config, exception advice, adapter security. |
+| **application/batch** | Scheduled batch job. |
 | **mybatis-generator / mybatis-schema-migration** | Công cụ generate code / quản lý DDL. |
 
 ## DTO flow
@@ -87,9 +88,9 @@ Cần **JDK 21**. Loại 2 module tooling (cần DB sống để build):
 mvn clean install -pl -mybatis-generator,-mybatis-schema-migration
 ```
 
-Chỉ test web/api (integration test trên H2 PostgreSQL-mode):
+Chỉ test application/api (integration test trên H2 PostgreSQL-mode):
 ```bash
-mvn test -pl web/api
+mvn test -pl application/api
 ```
 
 ## How to run — local (Docker Compose)
@@ -237,7 +238,7 @@ Có nút **Authorize** (bearer JWT) để gọi thử endpoint đã bảo vệ.
 
 ## Deploy Batch module
 
-Xem [batch/README.md](batch/README.md).
+Xem [application/batch/README.md](application/batch/README.md).
 
 ## Notes
 

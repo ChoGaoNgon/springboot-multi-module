@@ -7,11 +7,12 @@
         <artifactId>point-management-sys</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>web</artifactId>
+    <artifactId>application</artifactId>
     <packaging>pom</packaging>
 
     <modules>
         <module>api</module>
+        <module>batch</module>
     </modules>
 
     <properties>
@@ -19,19 +20,11 @@
     </properties>
 
     <dependencies>
-
-        <!-- Spring AOP -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
-        <!-- Business module -->
+        <!-- Business module — cả api và batch đều cần -->
         <dependency>
             <groupId>jp.co.htkk</groupId>
             <artifactId>business-implementation</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -54,5 +47,4 @@
             <url>https://repo.spring.io/milestone</url>
         </pluginRepository>
     </pluginRepositories>
-
 </project>

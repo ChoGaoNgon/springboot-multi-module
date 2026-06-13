@@ -33,8 +33,8 @@ Hướng dẫn cho AI/agent (và dev mới) làm việc trong repo này. Đọc 
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
   mvn clean install -pl -mybatis-generator,-mybatis-schema-migration
 
-# Chỉ test web/api (integration test trên H2)
-JAVA_HOME=... mvn test -pl web/api
+# Chỉ test application/api (integration test trên H2)
+JAVA_HOME=... mvn test -pl application/api
 
 # Chạy dev bằng docker compose (postgres:16 + api, có seed RBAC)
 JWT_SECRET=dev-secret-please-change-0123456789-abcdefghij docker compose up --build -d
@@ -48,7 +48,7 @@ curl http://localhost:9000/api/v1/actuator/health
 ## Module map (thứ tự build & chiều phụ thuộc)
 
 ```
-framework  → security → dto → entity → persistence → business → web/api → batch
+framework  → security → dto → entity → persistence → business → application/{api,batch}
                                                        (+ mybatis-generator, mybatis-schema-migration: tooling)
 ```
 
@@ -60,14 +60,15 @@ framework  → security → dto → entity → persistence → business → web/
 | `dto` | DTO + flow `common` (`REQUEST/DXO/PRM/RST/RESPONSE`, `Envelope/Meta`). |
 | `persistence` | DAO MyBatis (interface + XML colocated). |
 | `business` | `business-interface` (service interface) + `business-implementation` (impl). |
-| `web/api` | App chính (`PointManagementSysApplication`), controller, config, exception advice, adapter security. |
-| `batch` | Batch job độc lập (KHÔNG khai dependency `security`). |
+| `application` | Aggregator POM (packaging=pom) gom các app deployable. Shared deps (`business-implementation`, `spring-boot-maven-plugin`) khai 1 chỗ. Thêm app mới: tạo `application/<tên>/`. |
+| `application/api` | App chính (`PointManagementSysApplication`), controller, config, exception advice, adapter security. |
+| `application/batch` | Batch job độc lập (KHÔNG khai dependency `security`). |
 | `mybatis-generator` / `mybatis-schema-migration` | Tooling (generate code / DDL migration). |
 
 ## Coding rules / quy ước (BẮT BUỘC tuân theo)
 
 ### MyBatis (quan trọng nhất — dễ sai)
-- `MyBatisConfig` (web/api) dùng **`SqlSessionFactory` tự cấu hình → BỎ QUA block `mybatis.configuration` trong `application.yml`.** Vì vậy:
+- `MyBatisConfig` (application/api) dùng **`SqlSessionFactory` tự cấu hình → BỎ QUA block `mybatis.configuration` trong `application.yml`.** Vì vậy:
   - Mapper **phải có `resultMap` tường minh** + file XML **đặt cùng package** với interface (vd `persistence/dao/custom/CustomUserAuthMapper.java` + `.xml`).
   - Các setting đặt trong code: `mapUnderscoreToCamelCase=true`, `jdbcTypeForNull=NULL` (bắt buộc cho PostgreSQL).
 - Mapper interface đặt trong `jp.co.htkk.persistence.dao`, đăng ký qua `@MapperScan("jp.co.htkk.persistence.dao")` → mapper **viết tay KHÔNG cần** `@Mapper`. (Mapper generated có thể mang sẵn `@Mapper` do plugin itfsw sinh — vô hại, trùng với `@MapperScan`, không cần gỡ.)
@@ -81,17 +82,17 @@ framework  → security → dto → entity → persistence → business → web/
 - Validation dùng `jakarta.*`; custom validator ở `framework/validation`. Message key đồng bộ `jakarta`.
 
 ### Auditing
-- `AuditInterceptor` (web/api) tự điền `createdBy/createdAt/updatedBy/updatedAt` khi INSERT/UPDATE, lấy uid từ `LoginInfo.fromContext()` (ThreadLocal, set bởi JWT filter). Field uid kiểu `Long` (fallback `0L` khi chưa auth).
+- `AuditInterceptor` (application/api) tự điền `createdBy/createdAt/updatedBy/updatedAt` khi INSERT/UPDATE, lấy uid từ `LoginInfo.fromContext()` (ThreadLocal, set bởi JWT filter). Field uid kiểu `Long` (fallback `0L` khi chưa auth).
 
 ### Error handling
 - Envelope chuẩn: `ErrorResponse.of(HttpStatus, String message, List<String> errorCodes)` + enum `ErrorCode` (`EUNAUTHORIZED`="UNAUTHORIZED", `EACCES`="EACCES", `EINVAL_TOKEN`…).
-- `@ControllerAdvice`: `DefaultRestExceptionControllerAdvice` (framework, có catch-all `Exception`→500) được kế thừa bởi `ExceptionControllerAdvice` (web/api). **Method-security ném exception BÊN TRONG controller** nên phải map ở web/api advice: `AccessDeniedException`→403, `AuthenticationException`→401 (nếu không sẽ bị catch-all nuốt thành 500).
+- `@ControllerAdvice`: `DefaultRestExceptionControllerAdvice` (framework, có catch-all `Exception`→500) được kế thừa bởi `ExceptionControllerAdvice` (application/api). **Method-security ném exception BÊN TRONG controller** nên phải map ở application/api advice: `AccessDeniedException`→403, `AuthenticationException`→401 (nếu không sẽ bị catch-all nuốt thành 500).
 
 ### Security
 - Module `security` **auto-config** (`@AutoConfiguration` + `AutoConfiguration.imports`). App `@SpringBootApplication(scanBasePackages="jp.co.htkk")` nên auto-config bị `AutoConfigurationExcludeFilter` loại khỏi component scan (đúng ý).
 - `AuthController` là **`@RestController`** (được component scan bắt) — KHÔNG đăng ký lại bằng `@Bean` (plain `@Bean` + type-level `@RequestMapping` KHÔNG được map handler trong setup này → `/auth/login` không hoạt động).
 - Phân quyền method-level: `@PreAuthorize("hasAuthority('PERMISSION_CODE')")` (vd `USER_READ`, `USER_WRITE`). Authority string = `permission_code` trong DB; role map thành `ROLE_<code>`.
-- App tiêu thụ phải cung cấp 1 bean `SecurityUserService` (web/api: `SecurityUserServiceImpl` đọc qua `UserAuthMapper`). Secret: property `app.security.jwt.secret` (≥ 32 bytes); TTL `expiration` (30m), tự gia hạn khi còn ≤ `renew-window` (3m) qua header `X-New-Access-Token`.
+- App tiêu thụ phải cung cấp 1 bean `SecurityUserService` (application/api: `SecurityUserServiceImpl` đọc qua `UserAuthMapper`). Secret: property `app.security.jwt.secret` (≥ 32 bytes); TTL `expiration` (30m), tự gia hạn khi còn ≤ `renew-window` (3m) qua header `X-New-Access-Token`.
 
 ### Config & secrets
 - Cấu hình qua **env var + Spring profile** (`development` / `staging` / `production`). KHÔNG hardcode secret.
