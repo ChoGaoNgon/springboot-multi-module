@@ -136,7 +136,7 @@
         <module>business</module>
         <module>mybatis-generator</module>
         <module>mybatis-schema-migration</module>
-        <module>web</module>
+        <module>application</module>
         <module>batch</module>
     </modules>
 
