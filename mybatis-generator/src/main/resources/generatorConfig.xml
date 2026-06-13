@@ -49,7 +49,7 @@
             <!-- annotation's option(String) -->
             <property name="builder.builderMethodName" value="myBuilder"/>
 
-            <property name="accessors" value="true"/>
+            <property name="accessors" value="false"/>
 
             <!-- annotation's option(array of String) -->
             <property name="accessors.prefix" value="m_, _"/>
@@ -94,7 +94,7 @@
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>
 
-        <table tableName="users">
+        <table tableName="users" domainObjectName="User" mapperName="UserMapper">
             <generatedKey column="user_id" sqlStatement="JDBC" identity="true"/>
         </table>
     </context>
