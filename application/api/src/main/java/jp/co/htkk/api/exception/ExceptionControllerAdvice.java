@@ -7,6 +7,7 @@ import jp.co.htkk.framework.exception.model.ErrorCode;
 import jp.co.htkk.framework.exception.model.ErrorResponse;
 import jp.co.htkk.framework.exception.type.NoDataFoundException;
 import jp.co.htkk.framework.exception.type.ServiceException;
+import jp.co.htkk.security.google.service.GoogleAuthException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,5 +56,16 @@ public class ExceptionControllerAdvice extends DefaultRestExceptionControllerAdv
         ErrorResponse body = ErrorResponse.of(HttpStatus.UNAUTHORIZED, "Unauthorized",
                 List.of(ErrorCode.EUNAUTHORIZED.getErrorCode()));
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Google upstream/network failure thrown from the controller. Map to 502 Bad Gateway with the
+     * project envelope; without this it would fall through to the inherited Exception handler → 500.
+     */
+    @ExceptionHandler(GoogleAuthException.class)
+    public ResponseEntity<ErrorResponse> handleGoogleAuth(GoogleAuthException ex, HttpServletRequest req) {
+        ErrorResponse body = ErrorResponse.of(HttpStatus.BAD_GATEWAY, "Upstream service error",
+                List.of(ErrorCode.EBADGATEWAY.getErrorCode()));
+        return new ResponseEntity<>(body, HttpStatus.BAD_GATEWAY);
     }
 }

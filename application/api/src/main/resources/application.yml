@@ -86,6 +86,17 @@ app:
       secret: ${JWT_SECRET}
       expiration: 30m
       renew-window: 3m
+    public-paths:
+      - /auth/google/**
+    oauth:
+      google:
+        enabled: ${GOOGLE_OAUTH_ENABLED:true}
+        client-id: ${GOOGLE_OAUTH_CLIENT_ID:}
+        client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:}
+        allowed-redirect-uris:
+          - ${GOOGLE_OAUTH_REDIRECT_URI:http://localhost:3000/oauth/callback}
+        default-role-code: USER
+        http-timeout: 5s
 
 ---
 spring:

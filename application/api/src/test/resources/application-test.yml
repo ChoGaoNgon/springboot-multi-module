@@ -16,3 +16,14 @@ app:
       secret: test-secret-0123456789-0123456789-0123456789
       expiration: 30m
       renew-window: 3m
+    public-paths:
+      - /auth/google/**
+    oauth:
+      google:
+        enabled: true
+        client-id: test-client-id
+        client-secret: test-client-secret
+        allowed-redirect-uris:
+          - https://app/oauth/callback
+        default-role-code: USER
+        http-timeout: 5s
