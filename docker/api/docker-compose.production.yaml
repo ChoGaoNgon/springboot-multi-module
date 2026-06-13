@@ -12,7 +12,6 @@ services:
       - "${APP_PORT:-9000}:9000"
     environment:
       SPRING_PROFILES_ACTIVE: production
-      PORT: 9000
       LOG_PATH: ${LOG_PATH:-/var/log/app}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=75}
       POSTGRES_HOST: ${POSTGRES_HOST:?POSTGRES_HOST is required}
