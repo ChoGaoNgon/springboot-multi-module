@@ -61,7 +61,9 @@ framework  → security → dto → entity → persistence → business → appl
 | Module | Trách nhiệm |
 |---|---|
 | `framework` | Core dùng chung: `ErrorResponse`/`ErrorCode`, `DefaultRestExceptionControllerAdvice`, validators (`framework/validation`), `MessageService` (i18n), `LoginInfo` (ThreadLocal principal), util. Không phụ thuộc module nào. |
-| `security` | **Module security tái sử dụng, auto-config.** JWT HS256 + RBAC, deny-all-except-whitelist, login, 401/403 handlers. App khác chỉ cần khai dependency + set secret + cung cấp 1 bean `SecurityUserService`. |
+| `security` | **Aggregator (packaging=pom)** gom `security/core` (artifactId `security-core`) + `security/google` (artifactId `security-google`). Java package giữ nguyên `jp.co.htkk.security.*`. |
+| `security/core` | **Module security tái sử dụng, auto-config.** JWT HS256 + RBAC, deny-all-except-whitelist, login password, 401/403 handlers. App khác khai dependency `security-core` + set secret + cung cấp 1 bean `SecurityUserService`. |
+| `security/google` | **Google OAuth 2.0** (Authorization Code flow), auto-config. App khai dependency `security-google` (kéo theo `security-core`) + set `GOOGLE_OAUTH_*` + cung cấp 1 bean `GoogleUserSyncService`. |
 | `entity` | Entity MyBatis (vd `User`). |
 | `dto` | DTO + flow `common` (`REQUEST/DXO/PRM/RST/RESPONSE`, `Envelope/Meta`). |
 | `persistence` | DAO MyBatis (interface + XML colocated). |
@@ -95,10 +97,12 @@ framework  → security → dto → entity → persistence → business → appl
 - `@ControllerAdvice`: `DefaultRestExceptionControllerAdvice` (framework, có catch-all `Exception`→500) được kế thừa bởi `ExceptionControllerAdvice` (application/api). **Method-security ném exception BÊN TRONG controller** nên phải map ở application/api advice: `AccessDeniedException`→403, `AuthenticationException`→401 (nếu không sẽ bị catch-all nuốt thành 500).
 
 ### Security
+- **Module `security` là aggregator `security/{core,google}`**: `security-core` (login password + JWT + RBAC) và `security-google` (Google OAuth). App khai dependency `security-core` (+ `security-google` nếu cần Google login). Java package giữ nguyên `jp.co.htkk.security.*`. Mọi reference cũ tới artifactId `security` đã đổi sang `security-core`.
 - Module `security` **auto-config** (`@AutoConfiguration` + `AutoConfiguration.imports`). App `@SpringBootApplication(scanBasePackages="jp.co.htkk")` nên auto-config bị `AutoConfigurationExcludeFilter` loại khỏi component scan (đúng ý).
 - `AuthController` là **`@RestController`** (được component scan bắt) — KHÔNG đăng ký lại bằng `@Bean` (plain `@Bean` + type-level `@RequestMapping` KHÔNG được map handler trong setup này → `/auth/login` không hoạt động).
 - Phân quyền method-level: `@PreAuthorize("hasAuthority('PERMISSION_CODE')")` (vd `USER_READ`, `USER_WRITE`). Authority string = `permission_code` trong DB; role map thành `ROLE_<code>`.
 - App tiêu thụ phải cung cấp 1 bean `SecurityUserService` (application/api: `SecurityUserServiceImpl` đọc qua `UserAuthMapper`). Secret: property `app.security.jwt.secret` (≥ 32 bytes); TTL `expiration` (30m), tự gia hạn khi còn ≤ `renew-window` (3m) qua header `X-New-Access-Token`.
+- **Google OAuth** (`security-google`): `POST /auth/google/callback` `{code, redirectUri}` → BE exchange code với Google, verify `id_token` (lib `google-api-client`), upsert user qua port `GoogleUserSyncService` (app cung cấp bean — `GoogleUserSyncServiceImpl` ở application/api), cấp JWT giống password login. Auto-link theo email khi `email_verified=true`, auto-signup gán role `app.security.oauth.google.default-role-code` (mặc định `USER`). `redirectUri` phải nằm trong `allowed-redirect-uris` (chống open-redirect). User OAuth-only: `username=email`, `password=''` (KHÔNG password-login được — `AuthController` chặn empty hash). Schema: cột `users.google_sub` + unique partial index (regenerate `User` entity sau khi ALTER — **xoá `UserMapper.xml` trước khi `mybatis-generator:generate`** vì generator merge/append XML gây trùng `BaseResultMap`). Env: `GOOGLE_OAUTH_CLIENT_ID/SECRET/REDIRECT_URI`, `GOOGLE_OAUTH_ENABLED`. Lỗi Google upstream → `GoogleAuthException` → 502 (`EBADGATEWAY`).
 
 ### Config & secrets
 - Cấu hình qua **env var + Spring profile** (`development` / `staging` / `production`). KHÔNG hardcode secret.
