@@ -37,12 +37,16 @@ framework → security → dto → entity → persistence → business → appli
 ├── framework/                      # core dùng chung, không phụ thuộc module nào
 │   └── jp/co/htkk/framework/{component,constant,converter,csv,enums,exception,
 │                              httpclient,mail,security/model(LoginInfo),util,validation}
-├── security/                       # MODULE SECURITY tái sử dụng (auto-config)
-│   └── jp/co/htkk/security/
-│       ├── config/                 # SecurityModuleAutoConfiguration, SecurityModuleProperties
-│       ├── jwt/                     # JwtTokenService, JwtPrincipal
-│       ├── port/                    # SecurityUser, SecurityUserService (app tự cài đặt)
-│       └── web/                     # AuthController, JwtAuthenticationFilter, Rest{Auth,AccessDenied}Handler, dto
+├── security/                       # AGGREGATOR (packaging=pom): core + google
+│   ├── core/                        # security-core: password login + JWT + RBAC (auto-config)
+│   │   └── jp/co/htkk/security/{config,jwt,port,web}
+│   │                               #   SecurityModuleAutoConfiguration, JwtTokenService,
+│   │                               #   SecurityUser(Service), AuthController, JwtAuthenticationFilter
+│   └── google/                      # security-google: Google OAuth (auto-config)
+│       └── jp/co/htkk/security/google/{config,service,web,port}
+│                                   #   GoogleOAuthAutoConfiguration, GoogleAuthService,
+│                                   #   GoogleTokenClient, GoogleIdTokenVerifier, GoogleAuthController,
+│                                   #   GoogleUserSyncService (port, app tự cài đặt), GoogleUserInfo
 ├── entity/                         # Entity MyBatis (User)
 ├── dto/                            # common: REQUEST/DXO/PRM/RST/RESPONSE + Envelope/Meta; admin/user/*
 ├── persistence/                    # DAO MyBatis: UserMapper(.java/.xml), UserAuthMapper(.java/.xml)
@@ -67,7 +71,9 @@ framework → security → dto → entity → persistence → business → appli
 | Module | Mô tả |
 |---|---|
 | **framework** | Core: error envelope (`ErrorResponse`/`ErrorCode`), `@ControllerAdvice` mặc định, custom validators (`jakarta.*`), i18n (`MessageService`), `LoginInfo` (ThreadLocal principal), util. |
-| **security** | JWT HS256 + RBAC tự-cấu-hình. Deny-all-except-whitelist, login `/auth/login`, 401/403 theo error envelope, tự gia hạn token. App khác chỉ **khai dependency + set secret + cung cấp 1 bean `SecurityUserService`**. |
+| **security** | Aggregator (packaging=pom) gom `security-core` + `security-google`. |
+| **security-core** | JWT HS256 + RBAC tự-cấu-hình. Deny-all-except-whitelist, login `/auth/login`, 401/403 theo error envelope, tự gia hạn token. App khác **khai dependency `security-core` + set secret + cung cấp 1 bean `SecurityUserService`**. |
+| **security-google** | Google OAuth 2.0 (Authorization Code). `POST /auth/google/callback`, verify `id_token`, upsert user qua port `GoogleUserSyncService`, cấp JWT. App **khai dependency `security-google` + set `GOOGLE_OAUTH_*` + cung cấp 1 bean `GoogleUserSyncService`**. |
 | **entity** | Entity MyBatis. |
 | **dto** | DTO + luồng dữ liệu giữa các tầng. |
 | **persistence** | Repository layer (MyBatis mapper). |
@@ -131,7 +137,15 @@ Seed mặc định: `admin` / `admin123` (role ADMIN: `USER_READ`+`USER_WRITE`),
 - Gọi API bảo vệ: thêm header `Authorization: Bearer <token>`. Không có token → 401; thiếu quyền → 403 (theo error envelope).
 - Phân quyền method-level: `@PreAuthorize("hasAuthority('USER_WRITE')")` trên controller.
 - **Tự gia hạn**: khi token còn ≤ 3 phút, response trả token mới qua header `X-New-Access-Token` — client thay token đang lưu, phiên "trượt" liên tục mà không cần refresh-token riêng.
-- Dùng cho app khác: khai dependency `jp.co.htkk:security`, set `app.security.jwt.secret`, cung cấp 1 bean `SecurityUserService`.
+- Dùng cho app khác: khai dependency `jp.co.htkk:security-core`, set `app.security.jwt.secret`, cung cấp 1 bean `SecurityUserService`.
+- **Sign in with Google** (module `security-google`): FE redirect user tới Google, nhận `code`, rồi:
+  ```bash
+  curl -X POST http://localhost:9000/api/v1/auth/google/callback \
+    -H 'Content-Type: application/json' \
+    -d '{"code":"<code-from-google>","redirectUri":"https://app.example.com/oauth/callback"}'
+  # → {"accessToken":"...","tokenType":"Bearer","expiresIn":1800}
+  ```
+  BE exchange code với Google, verify `id_token`, auto-link theo email / auto-signup (role `USER`), cấp JWT. Env: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI` (phải nằm trong whitelist), `GOOGLE_OAUTH_ENABLED`. App tiêu thụ cung cấp 1 bean `GoogleUserSyncService`.
 
 ## Database schema & migration
 
@@ -161,7 +175,7 @@ Seed mặc định: `admin` / `admin123` (role ADMIN: `USER_READ`+`USER_WRITE`),
 
 Staging/production dùng **PostgreSQL bên ngoài** (managed như Supabase / RDS / Neon, hoặc DB trên VPS khác — compose KHÔNG dựng DB). Image build tại chỗ trên VPS từ `Dockerfile` multi-stage (non-root). Secret inject lúc run qua `--env-file`. **VPS chỉ cần Docker + Docker Compose + git** — KHÔNG cần JDK/Maven (migration chạy trong container Maven tạm theo cách B ở mục trên).
 
-Biến **bắt buộc**: `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET` (≥ 32 bytes). Thiếu bất kỳ biến nào → compose dừng ngay. Xem `.env.example` cho danh sách đầy đủ.
+Biến **bắt buộc**: `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET` (≥ 32 bytes), và (khi `GOOGLE_OAUTH_ENABLED=true`, mặc định) `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`. Thiếu bất kỳ biến nào → compose dừng ngay. Xem `.env.example` cho danh sách đầy đủ.
 
 ### Setup VPS lần đầu
 

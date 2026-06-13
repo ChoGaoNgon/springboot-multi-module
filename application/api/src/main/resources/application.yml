@@ -21,8 +21,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:helpo_step}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:123456}
     hikari:
       # Optimize max connection pool: amount = ((core_count * 2) + effective_spindle_count)
       maximum-pool-size: 10
@@ -83,9 +83,20 @@ management:
 app:
   security:
     jwt:
-      secret: ${JWT_SECRET}
+      secret: ${JWT_SECRET:dev-secret-please-change-0123456789-abcdefghij}
       expiration: 30m
       renew-window: 3m
+    public-paths:
+      - /auth/google/**
+    oauth:
+      google:
+        enabled: ${GOOGLE_OAUTH_ENABLED:true}
+        client-id: ${GOOGLE_OAUTH_CLIENT_ID:705412586145-4kab139brvkvpkmj1g3k43t59ao4161b.apps.googleusercontent.com}
+        client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET: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}
+        allowed-redirect-uris:
+          - ${GOOGLE_OAUTH_REDIRECT_URI:http://localhost:3000/oauth/callback}
+        default-role-code: USER
+        http-timeout: 5s
 
 ---
 spring:

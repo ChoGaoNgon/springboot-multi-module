@@ -28,7 +28,12 @@
 
         <dependency>
             <groupId>jp.co.htkk</groupId>
-            <artifactId>security</artifactId>
+            <artifactId>security-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>jp.co.htkk</groupId>
+            <artifactId>security-google</artifactId>
         </dependency>
 
         <dependency>

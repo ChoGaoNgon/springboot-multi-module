@@ -18,6 +18,8 @@ public class User implements Serializable {
 
     private String password;
 
+    private String googleSub;
+
     private Long createdBy;
 
     private Date createdAt;
@@ -35,6 +37,7 @@ public class User implements Serializable {
         username("username", "username", "VARCHAR", false),
         email("email", "email", "VARCHAR", false),
         password("password", "password", "VARCHAR", false),
+        googleSub("google_sub", "googleSub", "VARCHAR", false),
         createdBy("created_by", "createdBy", "BIGINT", false),
         createdAt("created_at", "createdAt", "TIMESTAMP", false),
         updatedBy("updated_by", "updatedBy", "BIGINT", false),

@@ -62,10 +62,15 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- Security -->
+            <!-- Security (aggregator: core + google) -->
             <dependency>
                 <groupId>jp.co.htkk</groupId>
-                <artifactId>security</artifactId>
+                <artifactId>security-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jp.co.htkk</groupId>
+                <artifactId>security-google</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
