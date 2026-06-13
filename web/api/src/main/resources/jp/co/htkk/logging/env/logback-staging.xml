@@ -6,8 +6,8 @@
 		<appender-ref ref="FILE" />
 	</root>
 
-	<logger name="org.mybatis">
-		<level value="FILE"/>
+	<logger name="org.mybatis" additivity="false">
+		<appender-ref ref="FILE"/>
 	</logger>
 
 	<!-- Application logs at trace level -->
