@@ -144,6 +144,7 @@ public enum ErrorCode {
     EINVAL_TOKEN("INVALID_TOKEN", "Invalid Token"),
     EMISSING_HEADER("MISSING_HEADER", "Missing header"),
     EDUPLICATE("EDUPLICATE", "Duplicate data"),
+    EBADGATEWAY("EBADGATEWAY", "Upstream service error"),
     /** No data found aws key */
     ES3NDFKEY("ES3NDFKEY", "S3: No data found key"),
     ;
