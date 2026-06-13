@@ -68,10 +68,11 @@ framework  → security → dto → entity → persistence → business → web/
 
 ### MyBatis (quan trọng nhất — dễ sai)
 - `MyBatisConfig` (web/api) dùng **`SqlSessionFactory` tự cấu hình → BỎ QUA block `mybatis.configuration` trong `application.yml`.** Vì vậy:
-  - Mapper **phải có `resultMap` tường minh** + file XML **đặt cùng package** với interface (vd `persistence/dao/UserMapper.java` + `UserMapper.xml`).
+  - Mapper **phải có `resultMap` tường minh** + file XML **đặt cùng package** với interface (vd `persistence/dao/custom/CustomUserAuthMapper.java` + `.xml`).
   - Các setting đặt trong code: `mapUnderscoreToCamelCase=true`, `jdbcTypeForNull=NULL` (bắt buộc cho PostgreSQL).
 - Mapper interface đặt trong `jp.co.htkk.persistence.dao`, đăng ký qua `@MapperScan("jp.co.htkk.persistence.dao")` (KHÔNG dùng `@Mapper` trên từng interface).
 - Soft delete: cột `del_flag` (`SMALLINT`, 0 = active); mọi query lọc `del_flag = 0`. INSERT dùng `useGeneratedKeys`.
+- **Generated vs custom mapper:** Entity + mapper CRUD 1 bảng do `mybatis-generator` sinh ở `*.generator.*` (vd `entity.generator.User`, `dao.generator.UserMapper`) — **KHÔNG sửa tay, bị ghi đè khi generate**. **Ưu tiên method generated**: lọc/sort/đếm 1 bảng dùng `selectByExample`/`selectOneByExample` + `*Criteria` (vd lọc `del_flag=0` qua `createCriteria().andDelFlagEqualTo((short)0)`) — không cần custom. Chỉ tạo `Custom<Tên>Mapper` ở `persistence/dao/custom/` khi generated **không làm được** (join đa bảng, query đặc thù): đa bảng → standalone (vd `CustomUserAuthMapper`); 1 bảng đặc thù → `extends` mapper generated (MyBatis tự resolve method kế thừa về namespace cha). Sinh code: `cd mybatis-generator && mvn mybatis-generator:generate` (cần DB sống; chạy **TỪ TRONG thư mục module** để path `../` đúng; mỗi `<table>` nên đặt `domainObjectName`/`mapperName` cho tên gọn).
 
 ### DTO flow
 - Luồng: `REQUEST.toDxo()` → `DXO.toPrm()` → service → `RST` → `RESPONSE`. Response bọc trong `Envelope`/`Meta`.
