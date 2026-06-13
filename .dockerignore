@@ -1,0 +1,11 @@
+target/
+**/target/
+.git/
+.idea/
+.vscode/
+*.log
+.DS_Store
+docker/
+docs/
+README.md
+CLAUDE.md
