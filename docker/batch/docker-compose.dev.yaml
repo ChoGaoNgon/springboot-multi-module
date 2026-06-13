@@ -1,0 +1,24 @@
+services:
+  batch:
+    image: batch:1.0.0
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: batch
+    container_name: pms-batch
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-development}
+      LOG_PATH: ${LOG_PATH:-/var/log/app}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: helpo_step
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      batch_id: ${batch_id:-JOB0001}
+    networks:
+      - pms-net
+
+networks:
+  pms-net:
+    external: true
