@@ -7,13 +7,16 @@
         <groupId>jp.co.htkk</groupId>
         <artifactId>point-management-sys</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
-    <artifactId>security</artifactId>
-    <packaging>pom</packaging>
-    <name>security</name>
+    <artifactId>security-google</artifactId>
+    <name>security-google</name>
 
-    <modules>
-        <module>core</module>
-        <module>google</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>jp.co.htkk</groupId>
+            <artifactId>security-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>
