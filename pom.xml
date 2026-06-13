@@ -137,7 +137,6 @@
         <module>mybatis-generator</module>
         <module>mybatis-schema-migration</module>
         <module>application</module>
-        <module>batch</module>
     </modules>
 
     <dependencies>

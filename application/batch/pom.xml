@@ -6,14 +6,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>jp.co.htkk</groupId>
-        <artifactId>point-management-sys</artifactId>
+        <artifactId>application</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>batch</artifactId>
     <name>batch</name>
 
     <properties>
-        <appName>${project.artifactId}-${project.version}</appName>
         <xlsx.streamer.version>2.1.0</xlsx.streamer.version>
     </properties>
 
@@ -37,12 +36,6 @@
             </exclusions>
         </dependency>
 
-        <!-- Business module -->
-        <dependency>
-            <groupId>jp.co.htkk</groupId>
-            <artifactId>business-implementation</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -64,11 +57,6 @@
             <version>${xlsx.streamer.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -79,14 +67,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <finalName>${appName}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>
