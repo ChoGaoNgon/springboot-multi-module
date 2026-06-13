@@ -533,6 +533,106 @@ public class UserCriteria {
             return (Criteria) this;
         }
 
+        public Criteria andGoogleSubIsNull() {
+            addCriterion("google_sub is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubIsNotNull() {
+            addCriterion("google_sub is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubEqualTo(String value) {
+            addCriterion("google_sub =", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubEqualToColumn(User.Column column) {
+            addCriterion(new StringBuilder("google_sub = ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubNotEqualTo(String value) {
+            addCriterion("google_sub <>", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubNotEqualToColumn(User.Column column) {
+            addCriterion(new StringBuilder("google_sub <> ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubGreaterThan(String value) {
+            addCriterion("google_sub >", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubGreaterThanColumn(User.Column column) {
+            addCriterion(new StringBuilder("google_sub > ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubGreaterThanOrEqualTo(String value) {
+            addCriterion("google_sub >=", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubGreaterThanOrEqualToColumn(User.Column column) {
+            addCriterion(new StringBuilder("google_sub >= ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubLessThan(String value) {
+            addCriterion("google_sub <", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubLessThanColumn(User.Column column) {
+            addCriterion(new StringBuilder("google_sub < ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubLessThanOrEqualTo(String value) {
+            addCriterion("google_sub <=", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubLessThanOrEqualToColumn(User.Column column) {
+            addCriterion(new StringBuilder("google_sub <= ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubLike(String value) {
+            addCriterion("google_sub like", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubNotLike(String value) {
+            addCriterion("google_sub not like", value, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubIn(List<String> values) {
+            addCriterion("google_sub in", values, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubNotIn(List<String> values) {
+            addCriterion("google_sub not in", values, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubBetween(String value1, String value2) {
+            addCriterion("google_sub between", value1, value2, "googleSub");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubNotBetween(String value1, String value2) {
+            addCriterion("google_sub not between", value1, value2, "googleSub");
+            return (Criteria) this;
+        }
+
         public Criteria andCreatedByIsNull() {
             addCriterion("created_by is null");
             return (Criteria) this;
@@ -995,6 +1095,11 @@ public class UserCriteria {
 
         public Criteria andPasswordLikeInsensitive(String value) {
             addCriterion("upper(password) like", value.toUpperCase(), "password");
+            return (Criteria) this;
+        }
+
+        public Criteria andGoogleSubLikeInsensitive(String value) {
+            addCriterion("upper(google_sub) like", value.toUpperCase(), "googleSub");
             return (Criteria) this;
         }
 

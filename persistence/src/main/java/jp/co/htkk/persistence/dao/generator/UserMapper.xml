@@ -6,6 +6,7 @@
     <result column="username" jdbcType="VARCHAR" property="username" />
     <result column="email" jdbcType="VARCHAR" property="email" />
     <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="google_sub" jdbcType="VARCHAR" property="googleSub" />
     <result column="created_by" jdbcType="BIGINT" property="createdBy" />
     <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="updated_by" jdbcType="BIGINT" property="updatedBy" />
@@ -71,8 +72,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    user_id, username, email, password, created_by, created_at, updated_by, updated_at, 
-    del_flag
+    user_id, username, email, password, google_sub, created_by, created_at, updated_by, 
+    updated_at, del_flag
   </sql>
   <select id="selectByExample" parameterType="jp.co.htkk.entity.generator.UserCriteria" resultMap="BaseResultMap">
     select
@@ -106,11 +107,13 @@
   </delete>
   <insert id="insert" keyColumn="user_id" keyProperty="userId" parameterType="jp.co.htkk.entity.generator.User" useGeneratedKeys="true">
     insert into users (username, email, password, 
-      created_by, created_at, updated_by, 
-      updated_at, del_flag)
+      google_sub, created_by, created_at, 
+      updated_by, updated_at, del_flag
+      )
     values (#{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
-      #{createdBy,jdbcType=BIGINT}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=BIGINT}, 
-      #{updatedAt,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=SMALLINT})
+      #{googleSub,jdbcType=VARCHAR}, #{createdBy,jdbcType=BIGINT}, #{createdAt,jdbcType=TIMESTAMP}, 
+      #{updatedBy,jdbcType=BIGINT}, #{updatedAt,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=SMALLINT}
+      )
   </insert>
   <insert id="insertSelective" keyColumn="user_id" keyProperty="userId" parameterType="jp.co.htkk.entity.generator.User" useGeneratedKeys="true">
     insert into users
@@ -123,6 +126,9 @@
       </if>
       <if test="password != null">
         password,
+      </if>
+      <if test="googleSub != null">
+        google_sub,
       </if>
       <if test="createdBy != null">
         created_by,
@@ -149,6 +155,9 @@
       </if>
       <if test="password != null">
         #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="googleSub != null">
+        #{googleSub,jdbcType=VARCHAR},
       </if>
       <if test="createdBy != null">
         #{createdBy,jdbcType=BIGINT},
@@ -188,6 +197,9 @@
       <if test="record.password != null">
         password = #{record.password,jdbcType=VARCHAR},
       </if>
+      <if test="record.googleSub != null">
+        google_sub = #{record.googleSub,jdbcType=VARCHAR},
+      </if>
       <if test="record.createdBy != null">
         created_by = #{record.createdBy,jdbcType=BIGINT},
       </if>
@@ -214,6 +226,7 @@
       username = #{record.username,jdbcType=VARCHAR},
       email = #{record.email,jdbcType=VARCHAR},
       password = #{record.password,jdbcType=VARCHAR},
+      google_sub = #{record.googleSub,jdbcType=VARCHAR},
       created_by = #{record.createdBy,jdbcType=BIGINT},
       created_at = #{record.createdAt,jdbcType=TIMESTAMP},
       updated_by = #{record.updatedBy,jdbcType=BIGINT},
@@ -234,6 +247,9 @@
       </if>
       <if test="password != null">
         password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="googleSub != null">
+        google_sub = #{googleSub,jdbcType=VARCHAR},
       </if>
       <if test="createdBy != null">
         created_by = #{createdBy,jdbcType=BIGINT},
@@ -258,6 +274,7 @@
     set username = #{username,jdbcType=VARCHAR},
       email = #{email,jdbcType=VARCHAR},
       password = #{password,jdbcType=VARCHAR},
+      google_sub = #{googleSub,jdbcType=VARCHAR},
       created_by = #{createdBy,jdbcType=BIGINT},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_by = #{updatedBy,jdbcType=BIGINT},
