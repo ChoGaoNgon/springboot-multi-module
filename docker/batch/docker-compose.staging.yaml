@@ -1,15 +1,15 @@
 services:
-  api:
+  batch:
     build:
-      context: ./
+      context: ../..
       dockerfile: Dockerfile
-    image: api:staging
+      args:
+        APP_MODULE: batch
+    image: batch:staging
+    container_name: pms-batch
     restart: unless-stopped
-    ports:
-      - "${APP_PORT:-9000}:9000"
     environment:
       SPRING_PROFILES_ACTIVE: staging
-      PORT: 9000
       LOG_PATH: ${LOG_PATH:-/var/log/app}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=75}
       POSTGRES_HOST: ${POSTGRES_HOST:?POSTGRES_HOST is required}
@@ -17,13 +17,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
       POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/api/v1/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
+      batch_id: ${batch_id:?batch_id is required (e.g. JOB0001)}
     deploy:
       resources:
         limits:

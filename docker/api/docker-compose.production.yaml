@@ -1,15 +1,17 @@
 services:
   api:
     build:
-      context: ./
+      context: ../..
       dockerfile: Dockerfile
+      args:
+        APP_MODULE: api
     image: api:production
+    container_name: pms-api
     restart: unless-stopped
     ports:
       - "${APP_PORT:-9000}:9000"
     environment:
       SPRING_PROFILES_ACTIVE: production
-      PORT: 9000
       LOG_PATH: ${LOG_PATH:-/var/log/app}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=75}
       POSTGRES_HOST: ${POSTGRES_HOST:?POSTGRES_HOST is required}
@@ -28,7 +30,7 @@ services:
       resources:
         limits:
           cpus: "${CPU_LIMIT:-1}"
-          memory: "${MEM_LIMIT:-1g}"
+          memory: "${MEM_LIMIT:-512m}"
     logging:
       driver: json-file
       options:

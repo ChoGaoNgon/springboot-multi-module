@@ -1,0 +1,26 @@
+services:
+  api:
+    image: api:1.0.0
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: api
+    container_name: pms-api
+    ports:
+      - "9000:9000"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-development}
+      LOG_PATH: ${LOG_PATH:-/var/log/app}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: helpo_step
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-please-change-0123456789-abcdefghij}
+    networks:
+      - pms-net
+
+networks:
+  pms-net:
+    external: true
