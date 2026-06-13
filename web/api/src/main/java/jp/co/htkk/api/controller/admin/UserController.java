@@ -1,5 +1,6 @@
 package jp.co.htkk.api.controller.admin;
 
+import com.github.pagehelper.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
@@ -49,7 +51,10 @@ public class UserController extends AbstractBaseController {
     @Operation(summary = "List users")
     @PreAuthorize("hasAuthority('USER_READ')")
     @GetMapping(value = "${endpoint.admin.user.list}")
-    public ResponseEntity<UserListResponse> list() {
-        return ResponseEntity.status(HttpStatus.OK).body(UserListResponse.of(userService.listUsers()));
+    public ResponseEntity<UserListResponse> list(
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        Page<User> page = userService.listUsers(pageNum, pageSize);
+        return ResponseEntity.status(HttpStatus.OK).body(UserListResponse.of(page));
     }
 }

@@ -1,5 +1,7 @@
 package jp.co.htkk.business.service.impl.admin;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import jp.co.htkk.business.service.AbstractBaseService;
 import jp.co.htkk.business.service.admin.UserService;
 import jp.co.htkk.dto.admin.user.dxo.UserDxo;
@@ -11,8 +13,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @AllArgsConstructor
 public class UserServiceImpl extends AbstractBaseService implements UserService {
@@ -21,9 +21,7 @@ public class UserServiceImpl extends AbstractBaseService implements UserService 
 
     @Override
     public User createUser(UserDxo dxo) {
-        User user = new User();
-        user.setUsername(dxo.getUsername());
-        user.setEmail(dxo.getEmail());
+        User user = dxo.convertToUser();
         userMapper.insertSelective(user);
         return user;
     }
@@ -40,10 +38,11 @@ public class UserServiceImpl extends AbstractBaseService implements UserService 
     }
 
     @Override
-    public List<User> listUsers() {
+    public Page<User> listUsers(int pageNum, int pageSize) {
         UserCriteria criteria = new UserCriteria();
         criteria.createCriteria().andDelFlagEqualTo((short) 0);
         criteria.setOrderByClause("user_id");
-        return userMapper.selectByExample(criteria);
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPage(() -> userMapper.selectByExample(criteria));
     }
 }

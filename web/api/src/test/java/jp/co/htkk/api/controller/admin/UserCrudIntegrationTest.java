@@ -63,11 +63,22 @@ class UserCrudIntegrationTest {
                 .andExpect(jsonPath("$.data.userId").value((int) userId))
                 .andExpect(jsonPath("$.data.username").value("alice"));
 
-        // list (admin + normal seed + alice => at least 3)
+        // list (admin + normal seed + alice => at least 3); data stays an array, page metadata alongside
         mockMvc.perform(get("/admin/users").servletPath("/admin/users")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(Matchers.greaterThanOrEqualTo(2)));
+                .andExpect(jsonPath("$.data.length()").value(Matchers.greaterThanOrEqualTo(2)))
+                .andExpect(jsonPath("$.page.total").value(Matchers.greaterThanOrEqualTo(3)))
+                .andExpect(jsonPath("$.page.pageNum").value(1))
+                .andExpect(jsonPath("$.page.pageSize").value(10));
+
+        // paginated: pageSize=1 returns exactly one row, but total still reflects all active users
+        mockMvc.perform(get("/admin/users?pageNum=1&pageSize=1").servletPath("/admin/users")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.page.pageSize").value(1))
+                .andExpect(jsonPath("$.page.total").value(Matchers.greaterThanOrEqualTo(3)));
     }
 }

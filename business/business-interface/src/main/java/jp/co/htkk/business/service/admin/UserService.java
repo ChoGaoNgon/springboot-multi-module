@@ -1,9 +1,8 @@
 package jp.co.htkk.business.service.admin;
 
+import com.github.pagehelper.Page;
 import jp.co.htkk.dto.admin.user.dxo.UserDxo;
 import jp.co.htkk.entity.generator.User;
-
-import java.util.List;
 
 public interface UserService {
 
@@ -11,5 +10,5 @@ public interface UserService {
 
     User getUser(Long userId);
 
-    List<User> listUsers();
+    Page<User> listUsers(int pageNum, int pageSize);
 }
