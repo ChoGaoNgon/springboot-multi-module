@@ -38,7 +38,9 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         SecurityUser user = userService.loadByUsername(request.getUsername());
         if (user == null || !user.isEnabled()
+                || user.getPasswordHash() == null || user.getPasswordHash().isEmpty()
                 || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            // Empty hash => OAuth-only account; reject with the same generic message to avoid enumeration.
             throw new BadCredentialsException("Invalid username or password");
         }
         String token = tokenService.issue(user.getUid(), user.getUsername(), user.getRoles(), user.getPermissions());
