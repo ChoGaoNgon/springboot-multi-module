@@ -56,10 +56,11 @@ framework → security → dto → entity → persistence → business → appli
 │   └── batch/                      # batch job độc lập (không dùng security)
 ├── mybatis-generator/              # tooling: generate entity/dao
 ├── mybatis-schema-migration/       # tooling: DDL migration + migrate.sh
-├── docker-compose.yaml             # DEV: postgres:16 + api + seed RBAC
-├── docker-compose.staging.yaml     # STAGING: chỉ api, DB ngoài
-├── docker-compose.production.yaml  # PRODUCTION: chỉ api, DB ngoài
-├── Dockerfile                      # multi-stage (build maven → runtime jre slim, non-root)
+├── docker/                         # ── Docker deployment per app per env ──
+│   ├── postgres/                   # DEV: postgres compose + init SQL (tạo pms-net)
+│   ├── api/                        # api: docker-compose.{dev,staging,production}.yaml
+│   └── batch/                      # batch: docker-compose.{dev,staging,production}.yaml
+├── Dockerfile                      # parameterized ARG APP_MODULE (multi-stage, non-root)
 └── .env.example                    # mẫu biến môi trường (không chứa giá trị thật)
 ```
 
@@ -95,13 +96,25 @@ mvn test -pl application/api
 
 ## How to run — local (Docker Compose)
 
-Dev compose chạy `postgres:16` + `api`, tự tạo bảng RBAC + seed user qua `docker/postgres-init/`:
+Dev compose chạy `postgres:16` riêng + `api` riêng (join external network `pms-net`), tự tạo bảng RBAC + seed user qua `docker/postgres/init/`:
 
 ```bash
-JWT_SECRET=dev-secret-please-change-0123456789-abcdefghij docker compose up --build -d
+# Bước 1: start postgres (tạo network pms-net)
+docker compose -f docker/postgres/docker-compose.dev.yaml up -d
+# Bước 2: start api
+JWT_SECRET=dev-secret-please-change-0123456789-abcdefghij \
+  docker compose -f docker/api/docker-compose.dev.yaml up --build -d
 # health (whitelist, không cần token):
 curl http://localhost:9000/api/v1/actuator/health
 # tear down:
+docker compose -f docker/api/docker-compose.dev.yaml down
+docker compose -f docker/postgres/docker-compose.dev.yaml down -v
+```
+
+**Tiện lợi (optional)**: set `COMPOSE_FILE` env để gọn lệnh:
+```bash
+export COMPOSE_FILE=docker/postgres/docker-compose.dev.yaml:docker/api/docker-compose.dev.yaml
+docker compose up --build -d
 docker compose down -v
 ```
 
@@ -122,7 +135,7 @@ Seed mặc định: `admin` / `admin123` (role ADMIN: `USER_READ`+`USER_WRITE`),
 
 ## Database schema & migration
 
-- **Dev**: schema + seed tạo tự động bởi `docker/postgres-init/01-create-users.sql` (chỉ chạy **lần đầu** khi volume rỗng — không phải công cụ migration).
+- **Dev**: schema + seed tạo tự động bởi `docker/postgres/init/01-create-users.sql` (chỉ chạy **lần đầu** khi volume rỗng — không phải công cụ migration).
 - **Staging / Production**: dùng `mybatis-schema-migration` qua wrapper `migrate.sh` (inject connection từ biến môi trường). 2 cách chạy:
 
   **A. Máy có sẵn JDK 21 + Maven** (vd máy dev):
@@ -186,7 +199,7 @@ docker run --rm -i -v "$PWD":/app -w /app postgres:16 \
   < seed-production.sql
 
 # 7) Up API:
-docker compose --env-file .env.production -f docker-compose.production.yaml up -d --build
+docker compose --env-file .env.production -f docker/api/docker-compose.production.yaml up -d --build
 
 # 8) Verify (từ trên VPS):
 curl -fsS http://localhost:9000/api/v1/actuator/health
@@ -207,7 +220,7 @@ docker run --rm -v "$PWD":/app -w /app \
 # nếu thấy "pending" → đổi `status` thành `up` và chạy lại
 
 # Rebuild image + restart container (zero-downtime: compose tự graceful restart):
-docker compose --env-file .env.production -f docker-compose.production.yaml up -d --build
+docker compose --env-file .env.production -f docker/api/docker-compose.production.yaml up -d --build
 
 # Verify:
 curl -fsS http://localhost:9000/api/v1/actuator/health
@@ -215,7 +228,7 @@ curl -fsS http://localhost:9000/api/v1/actuator/health
 
 ### Staging
 
-Y hệt production, đổi `production` → `staging` (`.env.staging`, `docker-compose.staging.yaml`, `migrate.sh staging up`).
+Y hệt production, đổi `production` → `staging` (`.env.staging`, `docker/api/docker-compose.staging.yaml`, `migrate.sh staging up`).
 
 ## Configuration (env vars)
 

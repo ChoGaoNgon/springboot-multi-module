@@ -36,8 +36,14 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 # Chỉ test application/api (integration test trên H2)
 JAVA_HOME=... mvn test -pl application/api
 
-# Chạy dev bằng docker compose (postgres:16 + api, có seed RBAC)
-JWT_SECRET=dev-secret-please-change-0123456789-abcdefghij docker compose up --build -d
+# Chạy dev bằng docker compose (postgres + api, có seed RBAC)
+# Bước 1: start postgres (tạo external network pms-net)
+docker compose -f docker/postgres/docker-compose.dev.yaml up -d
+# Bước 2: start api (join pms-net)
+JWT_SECRET=dev-secret-please-change-0123456789-abcdefghij \
+  docker compose -f docker/api/docker-compose.dev.yaml up --build -d
+# Optional: start batch
+docker compose -f docker/batch/docker-compose.dev.yaml up --build -d
 # health (whitelist, không cần token):
 curl http://localhost:9000/api/v1/actuator/health
 ```
@@ -108,8 +114,15 @@ framework  → security → dto → entity → persistence → business → appl
 - `@SpringBootTest` + `@AutoConfigureMockMvc` + `@ActiveProfiles("test")`. Endpoint đã bảo vệ → test phải login lấy token rồi gắn `Authorization: Bearer`.
 
 ### Migration (DDL)
-- Dev: docker `docker/postgres-init/01-create-users.sql` chạy **1 lần khi volume rỗng** (không phải công cụ migration).
+- Dev: docker `docker/postgres/init/01-create-users.sql` chạy **1 lần khi volume rỗng** (không phải công cụ migration).
 - Staging/prod: dùng `mybatis-schema-migration/migrate.sh <env> <up|down|status>` — script sinh env file từ biến môi trường (plugin 1.1.3 KHÔNG resolve `${...}`), chạy migration rồi xoá file. File `environments/{staging,production}.properties` bị gitignore + không commit.
+
+### Docker multi-app
+- 1 `Dockerfile` ở root, parameterized `ARG APP_MODULE` (mặc định `api`). Build app bất kỳ: `docker build --build-arg APP_MODULE=<module> -t <module>:tag .`
+- **Quy ước cứng**: folder name dưới `application/` PHẢI = artifactId của module Maven (vd `application/api/` ↔ artifactId `api`). Dockerfile phụ thuộc convention này để tìm jar `${APP_MODULE}-${version}.jar`.
+- Mỗi app có folder `docker/<app>/` chứa `docker-compose.{dev,staging,production}.yaml`. Add app mới: copy folder `docker/api/` thành `docker/<new-app>/` và sửa `APP_MODULE` + `image` + ports/env vars.
+- Dev compose dùng external network `pms-net` (tạo bởi `docker/postgres/docker-compose.dev.yaml`). Postgres phải start TRƯỚC app compose.
+- Khi app KHÔNG phải Spring Boot Java fat JAR (vd Node frontend, native CLI): không dùng root Dockerfile param — tạo Dockerfile riêng trong `application/<app>/Dockerfile`, compose tự khai báo `dockerfile: ../../application/<app>/Dockerfile`.
 
 ## Git / workflow
 - Quy trình: **brainstorm → spec (`docs/superpowers/specs/`) → plan (`docs/superpowers/plans/`) → implement** theo task, commit thường xuyên.
