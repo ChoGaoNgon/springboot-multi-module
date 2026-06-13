@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "PMS Postgres (dev)",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "helpo_step",
+      "Username": "postgres",
+      "SSLMode": "prefer"
+    }
+  }
+}
