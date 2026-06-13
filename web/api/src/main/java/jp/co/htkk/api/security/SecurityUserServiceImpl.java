@@ -1,6 +1,6 @@
 package jp.co.htkk.api.security;
 
-import jp.co.htkk.persistence.dao.UserAuthMapper;
+import jp.co.htkk.persistence.dao.custom.CustomUserAuthMapper;
 import jp.co.htkk.security.port.SecurityUser;
 import jp.co.htkk.security.port.SecurityUserService;
 import lombok.AllArgsConstructor;
@@ -13,11 +13,11 @@ import java.util.Set;
 @AllArgsConstructor
 public class SecurityUserServiceImpl implements SecurityUserService {
 
-    private final UserAuthMapper userAuthMapper;
+    private final CustomUserAuthMapper userAuthMapper;
 
     @Override
     public SecurityUser loadByUsername(String username) {
-        UserAuthMapper.UserAuthRow row = userAuthMapper.findByUsername(username);
+        CustomUserAuthMapper.UserAuthRow row = userAuthMapper.findByUsername(username);
         if (row == null) {
             return null;
         }

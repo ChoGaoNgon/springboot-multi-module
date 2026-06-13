@@ -1,8 +1,8 @@
-package jp.co.htkk.persistence.dao;
+package jp.co.htkk.persistence.dao.custom;
 
 import java.util.List;
 
-public interface UserAuthMapper {
+public interface CustomUserAuthMapper {
     /** Row from users by username (active only). */
     UserAuthRow findByUsername(String username);
 
