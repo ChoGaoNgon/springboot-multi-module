@@ -3,9 +3,10 @@ package jp.co.htkk.business.service.impl.admin;
 import jp.co.htkk.business.service.AbstractBaseService;
 import jp.co.htkk.business.service.admin.UserService;
 import jp.co.htkk.dto.admin.user.dxo.UserDxo;
-import jp.co.htkk.entity.User;
+import jp.co.htkk.entity.generator.User;
+import jp.co.htkk.entity.generator.UserCriteria;
 import jp.co.htkk.framework.exception.type.ServiceException;
-import jp.co.htkk.persistence.dao.UserMapper;
+import jp.co.htkk.persistence.dao.generator.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,15 @@ public class UserServiceImpl extends AbstractBaseService implements UserService 
         User user = new User();
         user.setUsername(dxo.getUsername());
         user.setEmail(dxo.getEmail());
-        // AuditInterceptor fills created_by/at, updated_by/at; useGeneratedKeys sets userId
-        userMapper.insertUser(user);
+        userMapper.insertSelective(user);
         return user;
     }
 
     @Override
     public User getUser(Long userId) {
-        User user = userMapper.selectById(userId);
+        UserCriteria criteria = new UserCriteria();
+        criteria.createCriteria().andUserIdEqualTo(userId).andDelFlagEqualTo((short) 0);
+        User user = userMapper.selectOneByExample(criteria);
         if (user == null) {
             throw new ServiceException(HttpStatus.NOT_FOUND, "User not found: " + userId);
         }
@@ -39,6 +41,9 @@ public class UserServiceImpl extends AbstractBaseService implements UserService 
 
     @Override
     public List<User> listUsers() {
-        return userMapper.selectAll();
+        UserCriteria criteria = new UserCriteria();
+        criteria.createCriteria().andDelFlagEqualTo((short) 0);
+        criteria.setOrderByClause("user_id");
+        return userMapper.selectByExample(criteria);
     }
 }

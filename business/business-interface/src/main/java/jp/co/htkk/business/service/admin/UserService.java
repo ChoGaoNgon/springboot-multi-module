@@ -1,7 +1,7 @@
 package jp.co.htkk.business.service.admin;
 
 import jp.co.htkk.dto.admin.user.dxo.UserDxo;
-import jp.co.htkk.entity.User;
+import jp.co.htkk.entity.generator.User;
 
 import java.util.List;
 

@@ -8,7 +8,7 @@ import jp.co.htkk.business.service.admin.UserService;
 import jp.co.htkk.dto.admin.user.request.UserCreateRequest;
 import jp.co.htkk.dto.admin.user.response.UserListResponse;
 import jp.co.htkk.dto.admin.user.response.UserResponse;
-import jp.co.htkk.entity.User;
+import jp.co.htkk.entity.generator.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

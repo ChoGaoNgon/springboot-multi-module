@@ -3,7 +3,7 @@ package jp.co.htkk.dto.admin.user.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jp.co.htkk.dto.common.RESPONSE;
-import jp.co.htkk.entity.User;
+import jp.co.htkk.entity.generator.User;
 import lombok.Data;
 
 @Data
