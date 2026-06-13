@@ -98,4 +98,4 @@ spring:
 ### File Logging settings
 logging:
   file:
-    path: ${LOG_PATH}
+    path: ${LOG_PATH:./logs}
