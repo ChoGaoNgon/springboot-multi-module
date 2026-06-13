@@ -12,12 +12,12 @@ COPY persistence/pom.xml persistence/pom.xml
 COPY business/pom.xml business/pom.xml
 COPY business/business-interface/pom.xml business/business-interface/pom.xml
 COPY business/business-implementation/pom.xml business/business-implementation/pom.xml
-COPY web/pom.xml web/pom.xml
-COPY web/api/pom.xml web/api/pom.xml
+COPY application/pom.xml application/pom.xml
+COPY application/api/pom.xml application/api/pom.xml
+COPY application/batch/pom.xml application/batch/pom.xml
 COPY mybatis-generator/pom.xml mybatis-generator/pom.xml
 COPY mybatis-schema-migration/pom.xml mybatis-schema-migration/pom.xml
-COPY batch/pom.xml batch/pom.xml
-RUN mvn -am -pl web/api -DskipTests dependency:go-offline
+RUN mvn -am -pl application/api -DskipTests dependency:go-offline
 
 # Copy sources and build the api jar
 COPY framework framework
@@ -26,8 +26,8 @@ COPY entity entity
 COPY dto dto
 COPY persistence persistence
 COPY business business
-COPY web web
-RUN mvn -am -pl web/api clean package -DskipTests
+COPY application/api application/api
+RUN mvn -am -pl application/api clean package -DskipTests
 
 # ---------- runtime ----------
 FROM eclipse-temurin:21-jre AS runtime
@@ -37,7 +37,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system app && useradd --system --gid app --no-create-home app \
     && mkdir -p /var/log/app/archived && chown -R app:app /var/log/app
-COPY --from=build /app/web/api/target/api-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/application/api/target/api-0.0.1-SNAPSHOT.jar app.jar
 RUN chown app:app app.jar
 USER app
 EXPOSE 9000
